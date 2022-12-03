@@ -49,18 +49,18 @@ func scoreFromRound(them, me string) int {
 
 func shapeScore(shape string) int {
 	switch shape {
-	case "X": // rock
+	case "A", "X": // rock
 		return 1
-	case "Y": // paper
+	case "B", "Y": // paper
 		return 2
-	case "Z": // scissors
+	case "C", "Z": // scissors
 		return 3
 	default:
 		panic("unknown")
 	}
 }
 
-func calculateScore(rd io.Reader) (int, error) {
+func calculateScorePart1(rd io.Reader) (int, error) {
 	score := 0
 
 	scanner := bufio.NewScanner(rd)

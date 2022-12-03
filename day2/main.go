@@ -18,7 +18,7 @@ func main() {
 	}
 	defer file.Close()
 
-	score, err := calculateScore(file)
+	score, err := calculateScorePart2(file)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
