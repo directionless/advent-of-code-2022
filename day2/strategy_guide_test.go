@@ -1,4 +1,4 @@
-package main
+package day2
 
 import (
 	"strings"
@@ -15,7 +15,7 @@ func TestCalculateScore(t *testing.T) {
 	t.Parallel()
 
 	in := strings.NewReader(exampleData)
-	score, err := calculateScorePart1(in)
+	score, err := CalculateScorePart1(in)
 
 	require.NoError(t, err)
 
@@ -26,7 +26,7 @@ func TestCalculateScore2(t *testing.T) {
 	t.Parallel()
 
 	in := strings.NewReader(exampleData)
-	score, err := calculateScorePart2(in)
+	score, err := CalculateScorePart2(in)
 
 	require.NoError(t, err)
 

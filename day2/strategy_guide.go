@@ -1,4 +1,4 @@
-package main
+package day2
 
 import (
 	"bufio"
@@ -60,7 +60,7 @@ func shapeScore(shape string) int {
 	}
 }
 
-func calculateScorePart1(rd io.Reader) (int, error) {
+func CalculateScorePart1(rd io.Reader) (int, error) {
 	score := 0
 
 	scanner := bufio.NewScanner(rd)

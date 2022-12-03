@@ -1,4 +1,4 @@
-package main
+package day2
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func calculateScorePart2(rd io.Reader) (int, error) {
+func CalculateScorePart2(rd io.Reader) (int, error) {
 	score := 0
 
 	scanner := bufio.NewScanner(rd)
