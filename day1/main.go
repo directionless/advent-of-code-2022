@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -27,21 +28,24 @@ func main() {
 		os.Exit(1)
 	}
 
-	elfNum, calories := mostCalories(elves)
-	fmt.Printf("Elf %d (0 indexed) has the most calories with %d\n", elfNum, calories)
+	n := 3
+	sum := 0
+	for _, c := range topCalories(n, elves) {
+		sum += c
+	}
+	fmt.Printf("Top %d elves are carrying %d\n", n, sum)
 }
 
-func mostCalories(elves []int) (int, int) {
-	var elfNumber, heaviest int
+func topCalories(n int, elves []int) []int {
+	// This only works for small values of N. Too large and the perf is going to be horrible.
+	biggest := make([]int, n+1)
 
-	for i, calories := range elves {
-		if calories > heaviest {
-			heaviest = calories
-			elfNumber = i
-		}
+	for _, calories := range elves {
+		biggest[0] = calories
+		sort.Sort(sort.IntSlice(biggest))
 	}
 
-	return elfNumber, heaviest
+	return biggest[1:]
 }
 
 func elfDivider(rd io.Reader) ([]int, error) {
