@@ -1,4 +1,4 @@
-package main
+package day1
 
 import (
 	"bufio"
@@ -9,20 +9,24 @@ import (
 	"strconv"
 )
 
-func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("Usage: day1 <input>")
-		os.Exit(1)
-	}
-
-	file, err := os.Open(os.Args[1])
+func Part1(rd io.Reader) error {
+	elves, err := elfDivider(rd)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	defer file.Close()
 
-	elves, err := elfDivider(file)
+	n := 1
+	sum := 0
+	for _, c := range topCalories(n, elves) {
+		sum += c
+	}
+	fmt.Printf("Top %d elves are carrying %d\n", n, sum)
+	return nil
+}
+
+func Part2(rd io.Reader) error {
+	elves, err := elfDivider(rd)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -34,6 +38,7 @@ func main() {
 		sum += c
 	}
 	fmt.Printf("Top %d elves are carrying %d\n", n, sum)
+	return nil
 }
 
 func topCalories(n int, elves []int) []int {

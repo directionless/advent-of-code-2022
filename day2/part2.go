@@ -7,6 +7,16 @@ import (
 	"strings"
 )
 
+func Part2(rd io.Reader) error {
+	score, err := CalculateScorePart2(rd)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(score)
+	return nil
+}
+
 func CalculateScorePart2(rd io.Reader) (int, error) {
 	score := 0
 

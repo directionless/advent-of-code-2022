@@ -80,3 +80,13 @@ func CalculateScorePart1(rd io.Reader) (int, error) {
 	return score, nil
 
 }
+
+func Part1(rd io.Reader) error {
+	score, err := CalculateScorePart1(rd)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(score)
+	return nil
+}
