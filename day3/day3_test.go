@@ -1,18 +1,51 @@
 package day3
 
 import (
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/directionless/advent-of-code-2022/runner"
 	"github.com/stretchr/testify/require"
 )
 
-const exampleData = `vJrwpWtwJgWrhcsFMMfFFhFp
+const (
+	exampleData = `vJrwpWtwJgWrhcsFMMfFFhFp
 jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
 PmmdzqPrVvPwwTWBwg
 wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
 ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw`
+
+	part1Answer = 7793
+	part2Answer = 2499
+)
+
+func TestRealPart1(t *testing.T) {
+	t.Parallel()
+
+	file, err := os.Open("input.txt")
+	require.NoError(t, err)
+	defer file.Close()
+
+	part1 := &Part1Handler{}
+	require.NoError(t, runner.ScanToHandler(part1, file))
+	require.Equal(t, part1Answer, part1.Answer())
+}
+
+/*
+func TestRealPart2(t *testing.T) {
+	t.Parallel()
+
+	file, err := os.Open("input.txt")
+	require.NoError(t, err)
+	defer file.Close()
+
+	tot, err := findBadges(file)
+	require.NoError(t, err)
+	require.Equal(t, part2Answer, tot)
+}
+*/
 
 func TestFindTotalPriority(t *testing.T) {
 	t.Parallel()

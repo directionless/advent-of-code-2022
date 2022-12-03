@@ -6,6 +6,33 @@ import (
 	"io"
 )
 
+type Part1Handler struct {
+	total int
+}
+
+func NewPart1() *Part1Handler {
+	return &Part1Handler{}
+}
+
+func (h *Part1Handler) Consume(line []byte) error {
+	miss := findMisFiledInSack(line)
+	if miss == 0 {
+		return fmt.Errorf("no miss")
+	}
+
+	h.total += itemPriority(miss)
+
+	return nil
+}
+
+func (h *Part1Handler) Answer() int {
+	return h.total
+}
+
+func (h *Part1Handler) Print() {
+	fmt.Printf("Total Priorty: %d\n", h.Answer())
+}
+
 func Part1(rd io.Reader) error {
 	tot, err := findTotalPriority(rd)
 	if err != nil {

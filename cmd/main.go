@@ -7,6 +7,9 @@ import (
 	"github.com/directionless/advent-of-code-2022/day1"
 	"github.com/directionless/advent-of-code-2022/day2"
 	"github.com/directionless/advent-of-code-2022/day3"
+	"github.com/directionless/advent-of-code-2022/day4"
+	"github.com/directionless/advent-of-code-2022/day5"
+	"github.com/directionless/advent-of-code-2022/runner"
 )
 
 // At least as of day2, there's a lot of basic open file, parse, etc.
@@ -43,14 +46,26 @@ func main() {
 		checkError(day1.Part1(file))
 	case day == "1" && part == "2":
 		checkError(day1.Part2(file))
+
 	case day == "2" && part == "1":
 		checkError(day2.Part1(file))
 	case day == "2" && part == "2":
 		checkError(day2.Part2(file))
+
 	case day == "3" && part == "1":
-		checkError(day3.Part1(file))
+		checkError(runner.Run(day3.NewPart1(), file))
 	case day == "3" && part == "2":
 		checkError(day3.Part2(file))
+
+	case day == "4" && part == "1":
+		checkError(runner.Run(day4.NewPart1(), file))
+	case day == "4" && part == "2":
+		checkError(runner.Run(day4.NewPart2(), file))
+
+	case day == "5" && part == "1":
+		checkError(runner.Run(day5.NewPart1(), file))
+	case day == "5" && part == "2":
+		checkError(runner.Run(day5.NewPart2(), file))
 
 	default:
 		fmt.Println("Unknown day/part combination")
