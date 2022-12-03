@@ -6,10 +6,12 @@ import (
 
 	"github.com/directionless/advent-of-code-2022/day1"
 	"github.com/directionless/advent-of-code-2022/day2"
+	"github.com/directionless/advent-of-code-2022/day3"
 )
 
 // At least as of day2, there's a lot of basic open file, parse, etc.
-// So I'm going to _slightly_ abstract this. Go makes it a bit hard. But :shrug:
+// So I'm going to _slightly_ abstract this. Go makes it hard to be super dynamic,
+// but we can be a little cleaner.
 
 func checkError(err error) {
 	if err != nil {
@@ -45,6 +47,11 @@ func main() {
 		checkError(day2.Part1(file))
 	case day == "2" && part == "2":
 		checkError(day2.Part2(file))
+	case day == "3" && part == "1":
+		checkError(day3.Part1(file))
+	case day == "3" && part == "2":
+		checkError(day3.Part2(file))
+
 	default:
 		fmt.Println("Unknown day/part combination")
 		os.Exit(1)
