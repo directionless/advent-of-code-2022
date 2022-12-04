@@ -11,11 +11,16 @@ import (
 )
 
 const (
-	exampleData    = ``
-	exampleAnswer1 = 0
-	exampleAnswer2 = 0
+	exampleData = `2-4,6-8
+2-3,4-5
+5-7,7-9
+2-8,3-7
+6-6,4-6
+2-6,4-8`
+	exampleAnswer1 = 2
+	exampleAnswer2 = 4
 
-	realAnswer1 = 0
+	realAnswer1 = 556
 	realAnswer2 = 0
 )
 
@@ -29,7 +34,16 @@ func TestPart1(t *testing.T) {
 
 		part1 := &Part1Handler{}
 		require.NoError(t, runner.ScanToHandler(part1, in))
-		require.Equal(t, exampleAnswer1, part1.Answer())
+
+		t.Run("part1", func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, exampleAnswer1, part1.Answer())
+		})
+
+		t.Run("part2", func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, exampleAnswer2, part1.AnswerPart2())
+		})
 	})
 
 	t.Run("real", func(t *testing.T) {
@@ -44,7 +58,15 @@ func TestPart1(t *testing.T) {
 
 		part1 := &Part1Handler{}
 		require.NoError(t, runner.ScanToHandler(part1, file))
-		require.Equal(t, realAnswer1, part1.Answer())
+
+		t.Run("part1", func(t *testing.T) {
+			require.Equal(t, realAnswer1, part1.Answer())
+		})
+		t.Run("part2", func(t *testing.T) {
+			t.Parallel()
+			require.Equal(t, realAnswer2, part1.AnswerPart2())
+		})
+
 	})
 
 }
