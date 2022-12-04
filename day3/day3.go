@@ -6,15 +6,15 @@ import (
 	"io"
 )
 
-type Part1Handler struct {
+type day3Handler struct {
 	total int
 }
 
-func NewPart1() *Part1Handler {
-	return &Part1Handler{}
+func New() *day3Handler {
+	return &day3Handler{}
 }
 
-func (h *Part1Handler) Consume(line []byte) error {
+func (h *day3Handler) Consume(line []byte) error {
 	miss := findMisFiledInSack(line)
 	if miss == 0 {
 		return fmt.Errorf("no miss")
@@ -25,12 +25,16 @@ func (h *Part1Handler) Consume(line []byte) error {
 	return nil
 }
 
-func (h *Part1Handler) Answer() int {
+func (h *day3Handler) AnswerPart1() int {
 	return h.total
 }
 
-func (h *Part1Handler) Print() {
-	fmt.Printf("Total Priorty: %d\n", h.Answer())
+func (h *day3Handler) AnswerPart2() int {
+	return 0
+}
+
+func (h *day3Handler) Print() {
+	fmt.Printf("Part1: Total Priorty: %d\n", h.AnswerPart1())
 }
 
 func Part1(rd io.Reader) error {

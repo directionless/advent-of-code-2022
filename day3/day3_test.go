@@ -28,9 +28,10 @@ func TestRealPart1(t *testing.T) {
 	require.NoError(t, err)
 	defer file.Close()
 
-	part1 := &Part1Handler{}
-	require.NoError(t, runner.ScanToHandler(part1, file))
-	require.Equal(t, part1Answer, part1.Answer())
+	handler := New()
+	require.NoError(t, runner.ScanToHandler(handler, file))
+	require.Equal(t, part1Answer, handler.AnswerPart1())
+	//require.Equal(t, part2Answer, handler.AnswerPart2())
 }
 
 /*

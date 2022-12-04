@@ -8,7 +8,6 @@ import (
 	"github.com/directionless/advent-of-code-2022/day2"
 	"github.com/directionless/advent-of-code-2022/day3"
 	"github.com/directionless/advent-of-code-2022/day4"
-	"github.com/directionless/advent-of-code-2022/day5"
 	"github.com/directionless/advent-of-code-2022/runner"
 )
 
@@ -53,19 +52,14 @@ func main() {
 		checkError(day2.Part2(file))
 
 	case day == "3" && part == "1":
-		checkError(runner.Run(day3.NewPart1(), file))
+		checkError(runner.Run(day3.New(), file))
 	case day == "3" && part == "2":
 		checkError(day3.Part2(file))
 
-	case day == "4" && part == "1":
-		checkError(runner.Run(day4.NewPart1(), file))
-	case day == "4" && part == "2":
-		checkError(runner.Run(day4.NewPart2(), file))
-
-	case day == "5" && part == "1":
-		checkError(runner.Run(day5.NewPart1(), file))
-	case day == "5" && part == "2":
-		checkError(runner.Run(day5.NewPart2(), file))
+	case day == "4":
+		checkError(runner.Run(day4.New(), file))
+	case day == "4":
+		checkError(runner.Run(day4.New(), file))
 
 	default:
 		fmt.Println("Unknown day/part combination")
