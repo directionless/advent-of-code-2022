@@ -8,7 +8,8 @@ import (
 
 type challengerHandler interface {
 	Consume([]byte) error
-	Answer() int
+	AnswerPart1() int
+	AnswerPart2() int
 	Print()
 }
 

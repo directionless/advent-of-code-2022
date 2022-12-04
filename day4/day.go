@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-type Part1Handler struct {
+type dayHandler struct {
 	countOfConsumedPairs int
 	partiallyOverlapping int
 }
 
-func NewPart1() *Part1Handler {
-	return &Part1Handler{}
+func New() *dayHandler {
+	return &dayHandler{}
 }
 
-func (h *Part1Handler) Consume(line []byte) error {
+func (h *dayHandler) Consume(line []byte) error {
 	//fmt.Printf("line: %s\n", string(line))
 
 	pairs := bytes.Split(line, []byte(","))
@@ -46,16 +46,17 @@ func (h *Part1Handler) Consume(line []byte) error {
 	return nil
 }
 
-func (h *Part1Handler) Answer() int {
+func (h *dayHandler) AnswerPart1() int {
 	return h.countOfConsumedPairs
 }
 
-func (h *Part1Handler) AnswerPart2() int {
+func (h *dayHandler) AnswerPart2() int {
 	return h.partiallyOverlapping
 }
 
-func (h *Part1Handler) Print() {
-	fmt.Printf("Elves with fully contained pairs: %d\n", h.Answer())
+func (h *dayHandler) Print() {
+	fmt.Printf("Part1: Elves with fully contained pairs: %d\n", h.AnswerPart1())
+	fmt.Printf("Part2: Elves with partiall overlapping pairs: %d\n", h.AnswerPart2())
 }
 
 func isSubSet(min1, max1, min2, max2 int) bool {
