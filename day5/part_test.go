@@ -22,25 +22,14 @@ move 2 from 2 to 1
 move 1 from 1 to 2`
 
 	exampleAnswer1 = 0 //"CMZ"
-	exampleAnswer2 = 0
+	exampleAnswer2 = 0 // MCD
 
 	realAnswer1 = 0 //"SBPQRSCDF"
-	realAnswer2 = 0
+	realAnswer2 = 0 // RGLVRCQSB
 )
 
 func TestExamples(t *testing.T) {
 	t.Parallel()
-
-	var tests = []struct {
-		in  string
-		out int
-	}{
-		{in: "mjqjpqmgbljsphdztnvjfqwrcgsmlb", out: 7},
-		{in: "bvwbjplbgvbhsrlpgdmjqwftvncz", out: 5},
-		{in: "nppdvjthqldpwncqszvftbrmjlhg", out: 6},
-		{in: "nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg", out: 10},
-		{in: "zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw", out: 11},
-	}
 
 	t.Run("example", func(t *testing.T) {
 		t.Parallel()
@@ -50,6 +39,8 @@ func TestExamples(t *testing.T) {
 		part1 := New()
 		require.NoError(t, runner.ScanToHandler(part1, in))
 		require.Equal(t, exampleAnswer1, part1.AnswerPart1())
+
+		require.NoError(t, part1.PrintStacks())
 
 	})
 

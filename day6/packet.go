@@ -7,6 +7,7 @@ import "fmt"
 // was quick. There are, no doubt, optimizations to be had.
 type packet struct {
 	sz   int
+	idx  int
 	data []byte
 }
 
@@ -18,17 +19,13 @@ func NewPacket(sz int) *packet {
 }
 
 func (p *packet) Push(b byte) {
-	// Instead of the array shift, it would be interesting to track where in the index we are,
-	// and overwrite the character directly.
-	if len(p.data) >= p.sz {
-		p.data = p.data[1:]
-	}
-
-	p.data = append(p.data, b)
+	p.data[p.idx%p.sz] = b
+	p.idx++
 }
 
 func (p *packet) String() string {
-	return fmt.Sprintf("(%d/%d)%s", p.sz, len(p.data), p.data)
+	// Because we're using a ring, converting to a string is going to be rotated.
+	return fmt.Sprintf("(rotated)%s", p.data)
 }
 
 func (p *packet) Uniq() bool {
@@ -36,10 +33,15 @@ func (p *packet) Uniq() bool {
 		return false
 	}
 
+	// This implementation has an n+1 -- ever call traverses the whole array. There should be an
+	// optimization where we persist uniq, and only clear it on a collision. Then we would need
+	// to re-traverse. That should reduce the number of array traversals. Not really worth it
+	// for advent though
+
 	uniq := make(map[byte]bool)
 
 	for _, b := range p.data {
-		// Uninitialized value, means not populated, means false
+		// Uninitialized value, means not populated, which means false for the purposes of Uniq
 		if b == 0 {
 			return false
 		}
