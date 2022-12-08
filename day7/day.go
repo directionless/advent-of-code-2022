@@ -3,12 +3,14 @@ package day7
 import (
 	"fmt"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
 
 const (
-	maxDepth = 100 // Sorry.
+	totalDiskSpace  = 70000000
+	neededDiskSpace = 30000000
 )
 
 type dayHandler struct {
@@ -102,6 +104,24 @@ func (h *dayHandler) AnswerPart1() int {
 }
 
 func (h *dayHandler) AnswerPart2() int {
+	// Find the smallest directory that, if deleted, would free up enough space on the filesystem
+	// to run the update. What is the total size of that directory?
+
+	freeSpace := totalDiskSpace - h.DirSize("/")
+	neededSpace := neededDiskSpace - freeSpace
+
+	sizes := make([]int, 0, len(h.directorySizesDoubled))
+	for _, size := range h.directorySizesDoubled {
+		sizes = append(sizes, size)
+	}
+	sort.Ints(sizes)
+
+	for _, sz := range sizes {
+		if sz >= neededSpace {
+			return sz
+		}
+	}
+
 	return 0
 }
 
@@ -191,6 +211,7 @@ func (h *dayHandler) Print() {
 	fmt.Printf("Part2: ???: %d\n", h.AnswerPart2())
 }
 
+/*
 func pathLen(path [maxDepth]string) int {
 	size := 0
 	for _, dir := range path {
@@ -230,3 +251,4 @@ func parentname(path [maxDepth]string) [maxDepth]string {
 	}
 	return parent
 }
+*/

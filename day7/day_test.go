@@ -10,14 +10,14 @@ import (
 
 const (
 	exampleAnswer1 = 95437
-	exampleAnswer2 = 0
+	exampleAnswer2 = 24933642
 
 	// 1577489 is too high
 	realAnswer1 = 1517599
-	realAnswer2 = 0
+	realAnswer2 = 2481982
 )
 
-func TestExample(t *testing.T) {
+func TestExample1(t *testing.T) {
 	t.Parallel()
 
 	in, err := os.Open("example.txt")
@@ -30,6 +30,7 @@ func TestExample(t *testing.T) {
 	day.DumpTree()
 
 	require.Equal(t, exampleAnswer1, day.AnswerPart1())
+	require.Equal(t, exampleAnswer2, day.AnswerPart2())
 
 	var tests = []struct {
 		path string
@@ -78,4 +79,5 @@ func TestReal(t *testing.T) {
 	day.DumpTree()
 
 	require.Equal(t, realAnswer1, day.AnswerPart1())
+	require.Equal(t, realAnswer2, day.AnswerPart2())
 }
