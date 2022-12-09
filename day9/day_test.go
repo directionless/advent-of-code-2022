@@ -10,10 +10,10 @@ import (
 
 const (
 	exampleAnswer1 = 13
-	exampleAnswer2 = 0
+	exampleAnswer2 = 1
 
 	realAnswer1 = 5878
-	realAnswer2 = 0
+	realAnswer2 = 2405
 )
 
 func TestExample1(t *testing.T) {
@@ -28,6 +28,21 @@ func TestExample1(t *testing.T) {
 
 	require.Equal(t, exampleAnswer1, day.AnswerPart1())
 	require.Equal(t, exampleAnswer2, day.AnswerPart2())
+
+}
+
+func TestExample2(t *testing.T) {
+	t.Parallel()
+
+	in, err := os.Open("example2.txt")
+	require.NoError(t, err)
+	defer in.Close()
+
+	day := New()
+	require.NoError(t, runner.ScanToHandler(day, in))
+
+	//require.Equal(t, exampleAnswer1, day.AnswerPart1())
+	require.Equal(t, 36, day.AnswerPart2())
 
 }
 

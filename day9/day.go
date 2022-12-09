@@ -8,16 +8,33 @@ import (
 
 const ()
 
-type dayHandler struct {
-	tailVisited map[[2]int]bool
+type point struct {
+	Row int
+	Col int
+}
 
-	headPos [2]int
-	tailPos [2]int
+func (p point) Array() [2]int {
+	return [2]int{p.Row, p.Col}
+}
+
+type dayHandler struct {
+	len    int
+	visted map[int]map[[2]int]bool
+	pos    map[int]*point
 }
 
 func New() *dayHandler {
+	length := 10
 	h := &dayHandler{
-		tailVisited: make(map[[2]int]bool),
+		len:    length,
+		visted: make(map[int]map[[2]int]bool, length),
+		pos:    make(map[int]*point, length),
+	}
+
+	for l := 0; l <= length; l++ {
+		h.pos[l] = &point{}
+		h.visted[l] = make(map[[2]int]bool)
+		h.visted[l][h.pos[l].Array()] = true
 	}
 
 	return h
@@ -38,33 +55,34 @@ func (h *dayHandler) Consume(line []byte) error {
 	}
 
 	for d := 0; d < totalDistance; d++ {
-		fmt.Printf("\nline %s 1: headPos: %v, tailPos: %v\n", line, h.headPos, h.tailPos)
+		fmt.Printf("\nline %s 1: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
 
 		// Move head _only_ 1 at a time.
 		switch line[0] {
 		case byte('U'):
-			h.headPos[1] += 1
+			h.pos[0].Col += 1
 		case byte('D'):
-			h.headPos[1] -= 1
+			h.pos[0].Col -= 1
 		case byte('L'):
-			h.headPos[0] -= 1
+			h.pos[0].Row -= 1
 		case byte('R'):
-			h.headPos[0] += 1
+			h.pos[0].Row += 1
 		default:
 			return errors.New("unknown direction")
 		}
 
 		//fmt.Printf("line %s 2: headPos: %v, tailPos: %v\n", line, h.headPos, h.tailPos)
-
-		if err := h.moveTail(); err != nil {
-			return fmt.Errorf("moving tail: %w", err)
+		for seg := 1; seg < h.len; seg++ {
+			if err := h.moveSegment(seg); err != nil {
+				return fmt.Errorf("moving seg %d: %w", seg, err)
+			}
 		}
 
-		fmt.Printf("line %s 3: headPos: %v, tailPos: %v\n", line, h.headPos, h.tailPos)
+		fmt.Printf("line %s 3: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
 
 	}
 
-	fmt.Printf("after line %s: headPos: %v, tailPos: %v\n", line, h.headPos, h.tailPos)
+	fmt.Printf("after line %s: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
 
 	return nil
 }
@@ -73,7 +91,9 @@ func (h *dayHandler) Consume(line []byte) error {
 //
 // Due to the aforementioned Planck lengths, the rope must be quite short; in fact, the head (H) and tail (T) must
 // always be touching (diagonally adjacent and even overlapping both count as touching):
-func (h *dayHandler) moveTail() error {
+func (h *dayHandler) moveSegment(seg int) error {
+	h.visted[seg][h.pos[seg].Array()] = true
+
 	ropeLen := 1
 
 	//fmt.Printf("moveTail: rowDiff: %d, colDiff: %d\n", h.headPos[0]-h.tailPos[0], h.headPos[1]-h.tailPos[1])
@@ -86,8 +106,8 @@ func (h *dayHandler) moveTail() error {
 	// Otherwise, if the head and tail aren't touching and aren't in the same row or column, the tail always moves
 	// one step diagonally to keep up:
 
-	rowDiff := h.headPos[0] - h.tailPos[0]
-	colDiff := h.headPos[1] - h.tailPos[1]
+	rowDiff := h.pos[seg-1].Row - h.pos[seg].Row
+	colDiff := h.pos[seg-1].Col - h.pos[seg].Col
 
 	// Early return if there is any touching
 	if abs(rowDiff) <= ropeLen && abs(colDiff) <= ropeLen {
@@ -99,13 +119,13 @@ func (h *dayHandler) moveTail() error {
 	case rowDiff == 0:
 		// nothing
 	case colDiff == 0 && rowDiff > ropeLen:
-		h.tailPos[0] += 1
+		h.pos[seg].Row += 1
 	case colDiff == 0 && rowDiff < -ropeLen:
-		h.tailPos[0] -= 1
+		h.pos[seg].Row -= 1
 	case rowDiff >= ropeLen:
-		h.tailPos[0] += 1
+		h.pos[seg].Row += 1
 	case rowDiff <= ropeLen:
-		h.tailPos[0] -= 1
+		h.pos[seg].Row -= 1
 	}
 
 	// move column
@@ -113,35 +133,35 @@ func (h *dayHandler) moveTail() error {
 	case colDiff == 0:
 		// nothing
 	case rowDiff == 0 && colDiff > 1:
-		h.tailPos[1] += 1
+		h.pos[seg].Col += 1
 	case rowDiff == 0 && colDiff < 1:
-		h.tailPos[1] -= 1
+		h.pos[seg].Col -= 1
 
 	case colDiff >= 1:
-		h.tailPos[1] += 1
+		h.pos[seg].Col += 1
 	case colDiff <= 1:
-		h.tailPos[1] -= 1
+		h.pos[seg].Col -= 1
 	}
 
-	h.tailVisited[h.tailPos] = true
+	h.visted[seg][h.pos[seg].Array()] = true
 
 	return nil
 }
 
 func (h *dayHandler) AnswerPart1() int {
-	fmt.Printf("Head is now row,col: %v\n", h.headPos)
-	fmt.Printf("Tail is now row,col: %v\n", h.tailPos)
+	//fmt.Printf("Head is now row,col: %v\n", h.headPos)
+	//fmt.Printf("Tail is now row,col: %v\n", h.tailPos)
 
 	//fmt.Printf("%v\n", h.tailVisited)
 
 	// Make sure we denote that we visited the starting point
-	h.tailVisited[[2]int{0, 0}] = true
+	//	h.visited[1]ited[[2]int{0, 0}] = true
 
-	return len(h.tailVisited)
+	return len(h.visted[1])
 }
 
 func (h *dayHandler) AnswerPart2() int {
-	return 0
+	return len(h.visted[9])
 }
 
 func (h *dayHandler) Print() {
