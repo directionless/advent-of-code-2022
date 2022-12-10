@@ -190,6 +190,9 @@ func (h *dayHandler) AnswerPart2() int {
 		}
 	}
 
+	_ = atRow
+	_ = atCol
+
 	return mostScenic
 }
 

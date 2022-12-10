@@ -6,8 +6,8 @@ import (
 	"strconv"
 )
 
-const ()
-
+// point is an xy point. I needed it because go was really unhappy with map[int][2]int,
+// and map[int]*point was simple
 type point struct {
 	Row int
 	Col int
@@ -49,6 +49,8 @@ func (h *dayHandler) Consume(line []byte) error {
 		return fmt.Errorf("line too short: %s", line)
 	}
 
+	// distance might be multicharacters, and as these are string encoded
+	// anyhow, Atoi(string()) is just simpler.
 	totalDistance, err := strconv.Atoi(string(line[2:]))
 	if err != nil {
 		return fmt.Errorf("unable to convert to distance: %w", err)
@@ -72,25 +74,24 @@ func (h *dayHandler) Consume(line []byte) error {
 		}
 
 		//fmt.Printf("line %s 2: headPos: %v, tailPos: %v\n", line, h.headPos, h.tailPos)
+
+		// With the head moved, now move each segment to follow.
 		for seg := 1; seg < h.len; seg++ {
 			if err := h.moveSegment(seg); err != nil {
 				return fmt.Errorf("moving seg %d: %w", seg, err)
 			}
 		}
 
-		fmt.Printf("line %s 3: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
+		//fmt.Printf("line %s 3: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
 
 	}
 
-	fmt.Printf("after line %s: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
-
+	//fmt.Printf("after line %s: headPos: %v, seg1: %v\n", line, h.pos[0], h.pos[1])
 	return nil
 }
 
-// moveTail moves the tail according to the provided rules:
-//
-// Due to the aforementioned Planck lengths, the rope must be quite short; in fact, the head (H) and tail (T) must
-// always be touching (diagonally adjacent and even overlapping both count as touching):
+// moveSegment moves a segment to be closer to the preceeding segment,
+// according to the provided rules.
 func (h *dayHandler) moveSegment(seg int) error {
 	h.visted[seg][h.pos[seg].Array()] = true
 
@@ -136,7 +137,6 @@ func (h *dayHandler) moveSegment(seg int) error {
 		h.pos[seg].Col += 1
 	case rowDiff == 0 && colDiff < 1:
 		h.pos[seg].Col -= 1
-
 	case colDiff >= 1:
 		h.pos[seg].Col += 1
 	case colDiff <= 1:
@@ -165,8 +165,8 @@ func (h *dayHandler) AnswerPart2() int {
 }
 
 func (h *dayHandler) Print() {
-	fmt.Printf("Part1: ???: %d\n", h.AnswerPart1())
-	fmt.Printf("Part2: ???: %d\n", h.AnswerPart2())
+	fmt.Printf("Part1: segment1 visted: %d\n", h.AnswerPart1())
+	fmt.Printf("Part2: segment9 visted: %d\n", h.AnswerPart2())
 }
 
 // abs is an absolute value function for ints.
