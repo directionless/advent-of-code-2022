@@ -11,14 +11,16 @@ import (
 const ()
 
 type dayHandler struct {
-	curMonkey *Monkey
-	monkeyNet *monkeyNetwork
-	noRelief  bool
+	curMonkey         *Monkey
+	monkeyNet         *monkeyNetwork
+	noRelief          bool
+	commonWorryFactor int
 }
 
 func New() *dayHandler {
 	h := &dayHandler{
-		monkeyNet: NewMonkeyNetwork(),
+		monkeyNet:         NewMonkeyNetwork(),
+		commonWorryFactor: 1,
 	}
 
 	return h
@@ -92,6 +94,8 @@ func (h *dayHandler) Consume(line []byte) error {
 		if err != nil {
 			return fmt.Errorf("unable to parse number: %w", err)
 		}
+
+		h.monkeyNet.commonWorryFactor *= num
 
 		h.curMonkey.TestFn = genTestDivisible(num)
 	case bytes.HasPrefix(line, []byte("    If true: throw to monkey ")):

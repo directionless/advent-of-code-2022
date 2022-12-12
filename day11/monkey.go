@@ -7,13 +7,17 @@ import (
 )
 
 type Item struct {
-	Worry   int
+	Worry   uint64
 	NextHop int
+}
+
+func (i Item) String() string {
+	return fmt.Sprintf("%d", i.Worry)
 }
 
 func NewItem(w int) *Item {
 	return &Item{
-		Worry:   w,
+		Worry:   uint64(w),
 		NextHop: -1,
 	}
 }
@@ -22,7 +26,7 @@ type itemTestFunc func(*Item) bool
 
 func genTestDivisible(n int) itemTestFunc {
 	return func(i *Item) bool {
-		return i.Worry%n == 0
+		return i.Worry%uint64(n) == 0
 	}
 }
 
@@ -30,13 +34,13 @@ type itemManipulatorFunc func(*Item)
 
 func genOperateAdd(n int) itemManipulatorFunc {
 	return func(i *Item) {
-		i.Worry += n
+		i.Worry += uint64(n)
 	}
 }
 
 func genOperateMultiply(n int) itemManipulatorFunc {
 	return func(i *Item) {
-		i.Worry *= n
+		i.Worry = i.Worry * uint64(n)
 	}
 }
 
@@ -69,7 +73,11 @@ func NewMonkey(pos int, noRelief bool) *Monkey {
 func (m *Monkey) String() string {
 	var sb strings.Builder
 
-	fmt.Fprintf(&sb, "Monkey %d:", m.Pos)
+	fmt.Fprintf(&sb, "Monkey %d: ", m.Pos)
+	for _, i := range m.Items {
+		fmt.Fprintf(&sb, "%d ", i.Worry)
+	}
+	fmt.Fprintf(&sb, "\n")
 
 	return sb.String()
 }
@@ -96,7 +104,7 @@ func (m *Monkey) Pop() *Item {
 	if !m.noRelief {
 		item.Worry = item.Worry / 3
 	}
-	fmt.Printf("item worry: %d\n", item.Worry)
+	//fmt.Printf("item worry: %d\n", item.Worry)
 
 	//fmt.Printf("Monkey %d is inspecting item %d (%d remaining)\n", m.Pos, item.Worry, len(m.Items))
 
@@ -110,8 +118,9 @@ func (m *Monkey) Pop() *Item {
 }
 
 type monkeyNetwork struct {
-	round   int
-	monkeys []*Monkey
+	round             int
+	monkeys           []*Monkey
+	commonWorryFactor int
 }
 
 // RunRound runs the monkey network for a round. This is implemented with logic
@@ -140,6 +149,20 @@ func (mn *monkeyNetwork) RunRound() error {
 				return fmt.Errorf("invalid NextHop")
 			}
 
+			// Since our worry level can get _very_ high, we need to reduce the value
+			// to something we can calculate. big.Int is one approach, but I've opted to
+			// whomp things by the common factor. After all -- the worry level only matters
+			// for how the monkeys route, and the the common factor is a no-op. (And I'm
+			// I'm slightly concerned we'll overflow big.Int, or be non-performant or something)
+			//
+			// Not sure this works when we square things. Hrm.....
+			if mn.commonWorryFactor != 1 && item.Worry > uint64(mn.commonWorryFactor) {
+				remain := item.Worry % uint64(mn.commonWorryFactor)
+
+				//fmt.Printf("worry modulo: %d %% %d = %d\n", item.Worry, mn.commonWorryFactor, remain)
+				item.Worry = remain
+			}
+
 			mn.monkeys[item.NextHop].Push(item)
 		}
 	}
@@ -148,8 +171,9 @@ func (mn *monkeyNetwork) RunRound() error {
 
 func NewMonkeyNetwork() *monkeyNetwork {
 	return &monkeyNetwork{
-		round:   0,
-		monkeys: []*Monkey{},
+		round:             0,
+		monkeys:           []*Monkey{},
+		commonWorryFactor: 1,
 	}
 }
 
@@ -162,8 +186,9 @@ func (mn *monkeyNetwork) Monkey(n int) *Monkey {
 }
 
 func (mn *monkeyNetwork) PrintInfo() {
-	for i, m := range mn.monkeys {
-		fmt.Printf("Monkey %d inspected items %d times.\n", i, m.InspectCount)
+	for _, m := range mn.monkeys {
+		fmt.Printf("%s", m)
+		// fmt.Printf("inspected items %d times.\n" m.InspectCount)
 	}
 }
 
