@@ -13,6 +13,7 @@ const ()
 type dayHandler struct {
 	curMonkey *Monkey
 	monkeyNet *monkeyNetwork
+	noRelief  bool
 }
 
 func New() *dayHandler {
@@ -38,7 +39,7 @@ func (h *dayHandler) Consume(line []byte) error {
 			return fmt.Errorf("unable to parse monkey number: %w", err)
 		}
 
-		h.curMonkey = NewMonkey(m)
+		h.curMonkey = NewMonkey(m, h.noRelief)
 		h.monkeyNet.AddMonkey(h.curMonkey)
 
 	case bytes.HasPrefix(line, []byte("  Starting items: ")):
@@ -115,9 +116,14 @@ func (h *dayHandler) Consume(line []byte) error {
 
 func (h *dayHandler) Run(rounds int) error {
 	for i := 1; i <= rounds; i++ {
-		fmt.Printf("Starting Round %d\n", i)
+		//fmt.Printf("Starting Round %d\n", i)
 		if err := h.monkeyNet.RunRound(); err != nil {
 			return fmt.Errorf("unable to run round %d: %w", i+1, err)
+		}
+
+		if i == 1 || i == 20 || i == 1000 {
+			fmt.Printf("After Round %d\n", i)
+			h.monkeyNet.PrintInfo()
 		}
 	}
 	return nil
@@ -129,7 +135,8 @@ func (h *dayHandler) AnswerPart1() int {
 }
 
 func (h *dayHandler) AnswerPart2() int {
-	return 0
+	h.monkeyNet.PrintInfo()
+	return h.monkeyNet.MonkeyBusiness()
 }
 
 func (h *dayHandler) Print() {

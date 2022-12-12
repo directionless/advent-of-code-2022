@@ -21,6 +21,8 @@ type dayHandler struct {
 	len    int
 	visted map[int]map[[2]int]bool
 	pos    map[int]*point
+
+	vm *videoMaker
 }
 
 func New() *dayHandler {
@@ -35,6 +37,10 @@ func New() *dayHandler {
 		h.pos[l] = &point{}
 		h.visted[l] = make(map[[2]int]bool)
 		h.visted[l][h.pos[l].Array()] = true
+	}
+
+	if h.vm != nil {
+		h.vm.AddMove(h.pos)
 	}
 
 	return h

@@ -54,11 +54,13 @@ type Monkey struct {
 	TestFn       itemTestFunc
 	TrueDest     int
 	FalseDest    int
+	noRelief     bool
 }
 
-func NewMonkey(pos int) *Monkey {
+func NewMonkey(pos int, noRelief bool) *Monkey {
 	m := &Monkey{
-		Pos: pos,
+		Pos:      pos,
+		noRelief: noRelief,
 	}
 
 	return m
@@ -91,7 +93,10 @@ func (m *Monkey) Pop() *Item {
 	// your relief that the monkey's inspection didn't damage the item causes
 	// your worry level to be divided by three and rounded down to the nearest integer.
 	m.Inspect(item)
-	item.Worry = item.Worry / 3
+	if !m.noRelief {
+		item.Worry = item.Worry / 3
+	}
+	fmt.Printf("item worry: %d\n", item.Worry)
 
 	//fmt.Printf("Monkey %d is inspecting item %d (%d remaining)\n", m.Pos, item.Worry, len(m.Items))
 

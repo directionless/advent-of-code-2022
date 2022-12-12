@@ -10,7 +10,7 @@ import (
 
 const (
 	exampleAnswer1 = 10605
-	exampleAnswer2 = 0
+	exampleAnswer2 = 2713310158
 
 	realAnswer1 = 55458
 	realAnswer2 = 0
@@ -34,17 +34,34 @@ func Test(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			in, err := os.Open(tt.input)
-			require.NoError(t, err)
-			defer in.Close()
+			t.Run("part1", func(t *testing.T) {
+				t.Parallel()
 
-			day := New()
-			require.NoError(t, runner.ScanToHandler(day, in))
+				in, err := os.Open(tt.input)
+				require.NoError(t, err)
+				defer in.Close()
 
-			require.NoError(t, day.Run(20))
+				day := New()
+				require.NoError(t, runner.ScanToHandler(day, in))
 
-			require.Equal(t, tt.part1, day.AnswerPart1())
-			require.Equal(t, tt.part2, day.AnswerPart2())
+				require.NoError(t, day.Run(20))
+				require.Equal(t, tt.part1, day.AnswerPart1())
+			})
+
+			t.Run("part2", func(t *testing.T) {
+				t.Parallel()
+
+				in, err := os.Open(tt.input)
+				require.NoError(t, err)
+				defer in.Close()
+
+				day := New()
+				day.noRelief = true
+				require.NoError(t, runner.ScanToHandler(day, in))
+
+				require.NoError(t, day.Run(10000))
+				require.Equal(t, tt.part2, day.AnswerPart2())
+			})
 		})
 	}
 }
