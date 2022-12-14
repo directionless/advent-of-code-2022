@@ -41,11 +41,9 @@ type grid struct {
 	graph   *simple.DirectedGraph
 
 	// handrolled BFS
-	bfsQueue  *list.List
-	visited   map[*location]bool
-	paths     map[*location][]*location
-	bfsSlice  []*location
-	bfsSliceI int
+	bfsQueue *list.List
+	visited  map[*location]bool
+	paths    map[*location][]*location
 }
 
 func NewGrid() *grid {
