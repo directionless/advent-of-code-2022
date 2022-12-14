@@ -11,10 +11,10 @@ import (
 
 const (
 	exampleAnswer1 = 31
-	exampleAnswer2 = 0
+	exampleAnswer2 = 29
 
 	realAnswer1 = 440 // 320 is too low
-	realAnswer2 = 0
+	realAnswer2 = 439
 )
 
 func Test(t *testing.T) {
@@ -54,8 +54,8 @@ func Test(t *testing.T) {
 				t.Run("Neighbors", func(t *testing.T) {
 					t.Parallel()
 					assert.Equal(t, 2, len(grid.Neighbors(grid.Node(0, 0))))
-					assert.Equal(t, 3, len(grid.Neighbors(grid.Node(2, 2))))
-					assert.Equal(t, 4, len(grid.Neighbors(grid.Node(3, 3))))
+					assert.Equal(t, 4, len(grid.Neighbors(grid.Node(2, 2))))
+					assert.Equal(t, 2, len(grid.Neighbors(grid.Node(3, 3))))
 				})
 
 			})

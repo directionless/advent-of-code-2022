@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"gonum.org/v1/gonum/graph"
 	"gonum.org/v1/gonum/graph/simple"
-	"gonum.org/v1/gonum/graph/traverse"
 )
 
 // (really this is part of day handler)
@@ -27,13 +25,6 @@ func (l location) ID() int64 {
 
 func (l location) String() string {
 	return fmt.Sprintf("%d,%d,%c", l.X, l.Y, l.H)
-}
-
-type path struct {
-	start    location
-	end      location
-	distance int
-	Steps    []location
 }
 
 // This is kinda silly. The `location` is used, not as a graph node, but as a simple encapsulation of
@@ -156,14 +147,8 @@ func (g *grid) Neighbors(cur *location) []*location {
 			targetH = 'z'
 		}
 
-		// Stepping down is okay
-		//if int(myHeight) >= int(node.H) {
-		//	neighbors = append(neighbors, node)
-		//	continue
-		//}
-
 		// We can step, at most, one up
-		if int(myHeight)+1 >= int(targetH) {
+		if int(myHeight)-1 <= int(targetH) {
 			neighbors = append(neighbors, node)
 			fmt.Printf("Found neighbor %s from %s. height: %c > %c \n", node, cur, myHeight, node.H)
 			continue
@@ -187,74 +172,17 @@ func (g *grid) String() string {
 	return sb.String()
 }
 
-func (g *grid) SolveWithGraph() error {
-	if err := g.BuildGraph(); err != nil {
-		return err
-	}
-
-	// I don't understand what I would use for the traverse function. It seems to be
-	// an additional constraint on the edges
-	//traverseFn := func(_ graph.Edge) bool {
-	//	return true
-	//}
-
-	//spew.Dump(g.graph.Edges())
-
-	visitFn := func(n graph.Node) {
-		fmt.Printf("visited %s\n", n)
-	}
-
-	bfs := traverse.BreadthFirst{
-		//Traverse: traverseFn,
-		Visit: visitFn,
-	}
-
-	var got [][]int64
-	_ = bfs.Walk(
-		g.graph,
-		g.start,
-		func(n graph.Node, d int) bool {
-			if n == g.end {
-				return true
-			}
-
-			if d >= len(got) {
-				got = append(got, []int64(nil))
-			}
-			got[d] = append(got[d], n.ID())
-
-			return false
-		})
-
-	fmt.Printf("got: %d\n", len(got))
-
-	//spew.Dump(got)
-
-	//found := graphpath.YenKShortestPaths(g.graph, 1, g.start, g.end)
-	//spew.Dump(found)
-
-	return nil
-}
-
-func (g *grid) Solve() int {
-	g.ResetBFS()
-	return g.BFS()
-}
 func (g *grid) ResetBFS() {
 	g.visited = make(map[*location]bool, len(g.grid))
 	g.bfsQueue = list.New()
 	g.paths = make(map[*location][]*location, len(g.grid))
 
 	g.start.DistanceToStart = 0
-	g.visited[g.start] = true
-	//g.bfsSlice = append(g.bfsSlice, g.start)
-	//g.bfsSliceI = 0
-	g.bfsQueue.PushBack(g.start)
-
-	fmt.Printf("start: %s, End: %s\n", g.start, g.end)
+	g.visited[g.end] = true
+	g.bfsQueue.PushBack(g.end)
 }
 
-func (g *grid) BFS() int {
+func (g *grid) BFS(lowNotStart bool) int {
 	for g.bfsQueue.Len() > 0 {
 		// Note the lack of nil check here. live dangereously
 		cur := g.bfsQueue.Front().Value.(*location)
@@ -262,10 +190,17 @@ func (g *grid) BFS() int {
 
 		fmt.Printf("BFS check %s\n", cur)
 
-		if cur.X == g.end.X && cur.Y == g.end.Y {
+		if !lowNotStart && cur.X == g.start.X && cur.Y == g.start.Y {
 			fmt.Printf("found: %s. It's %s\n", g.end, cur)
 			g.PrintPath(cur)
 			return cur.DistanceToStart
+		}
+
+		if lowNotStart && cur.H == 'a' {
+			fmt.Printf("found: %s. It's %s\n", g.end, cur)
+			g.PrintPath(cur)
+			return cur.DistanceToStart
+
 		}
 
 		neighbors := g.Neighbors(cur)
@@ -301,94 +236,3 @@ func (g *grid) PrintPath(l *location) {
 		fmt.Println()
 	}
 }
-
-/*
-
-func (g *grid) Solve() error {
-	if err := g.BuildGraph(); err != nil {
-		return err
-	}
-
-	if g.grid[g.start] != 'S' {
-		return fmt.Errorf("start not set")
-	}
-
-	fmt.Printf("Starting at %s: %c\n", g.start, g.grid[g.start])
-
-	paths := g.Recurse(g.start, path{})
-
-	fmt.Printf("Found %d possible paths\n", len(paths))
-
-	for _, p := range paths {
-		fmt.Printf("Path is %d long\n", len(p.Steps))
-		fmt.Printf("%v", p.Steps)
-	}
-	fmt.Printf("\n")
-	return nil
-}
-
-func (g *grid) Recurse(cur location, p path) []path {
-	if g.visted[cur] {
-		return nil
-	}
-
-	g.visted[cur] = true
-
-	possibilities := []location{
-		{X: cur.X, Y: cur.Y - 1},
-		{X: cur.X, Y: cur.Y + 1},
-		{X: cur.X - 1, Y: cur.Y},
-		{X: cur.X + 1, Y: cur.Y},
-	}
-
-	// Denote this step.
-	p.Steps = append(p.Steps, cur)
-
-	var paths []path
-
-	for _, possibility := range possibilities {
-		if possibility.X < 0 || possibility.Y < 0 {
-			continue
-		}
-
-		if g.grid[possibility] == 0 {
-			continue
-		}
-
-		// Have we been here before? This should prevent us from backtracking
-		// This probably won't work. Consider a path that has a long loop and a
-		// cross. We might end up on the loop, and we'll over count.
-		if g.visted[possibility] {
-			//continue
-		}
-
-		// Are we done?
-		if g.grid[possibility] == 'E' {
-			return []path{p}
-		}
-
-		// Do these points connect?
-		if g.grid[possibility] != 'S' &&
-			g.grid[possibility] != 'E' &&
-			g.grid[cur] != 'S' &&
-			g.grid[cur] != 'E' {
-
-			terrainDiff := int(g.grid[possibility]) - int(g.grid[cur])
-			if terrainDiff < -1 && terrainDiff > 1 {
-				fmt.Printf("Cannot travel between %s(%c) and %s(%c)\n",
-					cur, g.grid[cur], possibility, g.grid[possibility],
-				)
-				continue
-			}
-		}
-
-		// Right now, just for debugging
-		possibility.H = g.grid[possibility]
-
-		// Recurse
-		paths = append(paths, g.Recurse(possibility, p)...)
-	}
-
-	return paths
-}
-*/

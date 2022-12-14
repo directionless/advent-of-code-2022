@@ -35,12 +35,12 @@ func (h *dayHandler) Consume(line []byte) error {
 
 func (h *dayHandler) AnswerPart1() int {
 	h.grid.ResetBFS()
-
-	return h.grid.BFS()
+	return h.grid.BFS(false)
 }
 
 func (h *dayHandler) AnswerPart2() int {
-	return 0
+	h.grid.ResetBFS()
+	return h.grid.BFS(true)
 }
 
 func (h *dayHandler) Print() {
