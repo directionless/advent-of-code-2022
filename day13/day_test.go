@@ -13,7 +13,7 @@ const (
 	exampleAnswer2 = 140
 
 	realAnswer1 = 5825
-	realAnswer2 = 0
+	realAnswer2 = 24477
 )
 
 func Test(t *testing.T) {
