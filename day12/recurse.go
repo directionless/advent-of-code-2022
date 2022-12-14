@@ -1,6 +1,7 @@
 package day12
 
 import (
+	"container/list"
 	"fmt"
 	"strings"
 
@@ -12,13 +13,14 @@ import (
 // (really this is part of day handler)
 
 type location struct {
-	X      int
-	Y      int
-	H      byte
-	nodeID int64
+	X               int
+	Y               int
+	H               byte
+	nodeID          int64
+	DistanceToStart int
 }
 
-// ID is compatible with the graph library
+// ID is compatible with the gonum/graph pkg
 func (l location) ID() int64 {
 	return l.nodeID
 }
@@ -43,8 +45,16 @@ type grid struct {
 	width  int
 	height int
 
+	// gonum/graph stuff
 	nodeNum int64
 	graph   *simple.DirectedGraph
+
+	// handrolled BFS
+	bfsQueue  *list.List
+	visited   map[*location]bool
+	paths     map[*location][]*location
+	bfsSlice  []*location
+	bfsSliceI int
 }
 
 func NewGrid() *grid {
@@ -54,6 +64,10 @@ func NewGrid() *grid {
 		nodeNum: 100,
 	}
 	return g
+}
+
+func (g *grid) Node(x, y int) *location {
+	return g.grid[location{X: x, Y: y}]
 }
 
 func (g *grid) AddRow(row []byte) error {
@@ -87,6 +101,7 @@ func (g *grid) AddRow(row []byte) error {
 	return nil
 }
 
+// BuildGraph builds the gonum/graph object for usage.
 func (g *grid) BuildGraph() error {
 	for y := 0; y < g.height; y++ {
 		for x := 0; x < g.width; x++ {
@@ -104,6 +119,7 @@ func (g *grid) BuildGraph() error {
 	return nil
 }
 
+// Neighbors returns the reachable neighbors of a given node.
 func (g *grid) Neighbors(cur *location) []*location {
 	possibilities := []location{
 		{X: cur.X, Y: cur.Y - 1},
@@ -121,25 +137,35 @@ func (g *grid) Neighbors(cur *location) []*location {
 		}
 
 		myHeight := cur.H
+		targetH := node.H
+
+		//fmt.Printf("examining %c with %c\n", cur.H, node.H)
 
 		// S is like 'a', 'E' is like 'z'
 		if myHeight == 'S' {
 			myHeight = 'a'
 		}
+		if targetH == 'S' {
+			targetH = 'a'
+		}
 
 		if myHeight == 'E' {
 			myHeight = 'z'
 		}
-
-		// Stepping down is okay
-		if int(myHeight) >= int(node.H) {
-			neighbors = append(neighbors, node)
-			continue
+		if targetH == 'E' {
+			targetH = 'z'
 		}
 
+		// Stepping down is okay
+		//if int(myHeight) >= int(node.H) {
+		//	neighbors = append(neighbors, node)
+		//	continue
+		//}
+
 		// We can step, at most, one up
-		if int(myHeight)+1 >= int(node.H) {
+		if int(myHeight)+1 >= int(targetH) {
 			neighbors = append(neighbors, node)
+			fmt.Printf("Found neighbor %s from %s. height: %c > %c \n", node, cur, myHeight, node.H)
 			continue
 		}
 
@@ -161,7 +187,7 @@ func (g *grid) String() string {
 	return sb.String()
 }
 
-func (g *grid) Solve() error {
+func (g *grid) SolveWithGraph() error {
 	if err := g.BuildGraph(); err != nil {
 		return err
 	}
@@ -208,6 +234,72 @@ func (g *grid) Solve() error {
 	//spew.Dump(found)
 
 	return nil
+}
+
+func (g *grid) Solve() int {
+	g.ResetBFS()
+	return g.BFS()
+}
+func (g *grid) ResetBFS() {
+	g.visited = make(map[*location]bool, len(g.grid))
+	g.bfsQueue = list.New()
+	g.paths = make(map[*location][]*location, len(g.grid))
+
+	g.start.DistanceToStart = 0
+	g.visited[g.start] = true
+	//g.bfsSlice = append(g.bfsSlice, g.start)
+	//g.bfsSliceI = 0
+	g.bfsQueue.PushBack(g.start)
+
+	fmt.Printf("start: %s, End: %s\n", g.start, g.end)
+}
+
+func (g *grid) BFS() int {
+	for g.bfsQueue.Len() > 0 {
+		// Note the lack of nil check here. live dangereously
+		cur := g.bfsQueue.Front().Value.(*location)
+		g.bfsQueue.Remove(g.bfsQueue.Front())
+
+		fmt.Printf("BFS check %s\n", cur)
+
+		if cur.X == g.end.X && cur.Y == g.end.Y {
+			fmt.Printf("found: %s. It's %s\n", g.end, cur)
+			g.PrintPath(cur)
+			return cur.DistanceToStart
+		}
+
+		neighbors := g.Neighbors(cur)
+
+		for _, n := range neighbors {
+			if g.visited[n] {
+				continue
+			}
+			n.DistanceToStart = cur.DistanceToStart + 1
+			g.paths[n] = append(g.paths[cur], n)
+			g.bfsQueue.PushBack(n)
+			g.visited[n] = true
+		}
+	}
+	return -1
+}
+
+func (g *grid) PrintPath(l *location) {
+	out := map[[2]int]byte{}
+	for _, p := range g.paths[l] {
+		fmt.Printf("%s\n", p)
+		out[[2]int{p.X, p.Y}] = p.H
+	}
+
+	for y := 0; y < g.height; y++ {
+		for x := 0; x < g.width; x++ {
+			if out[[2]int{x, y}] != 0 {
+				fmt.Printf("%c", out[[2]int{x, y}])
+			} else {
+				fmt.Print(" ")
+			}
+		}
+		fmt.Println()
+	}
 }
 
 /*

@@ -19,6 +19,10 @@ func New() *dayHandler {
 	return h
 }
 
+func (h *dayHandler) Grid() *grid {
+	return h.grid
+}
+
 func (h *dayHandler) Consume(line []byte) error {
 	if len(line) == 0 {
 		return nil
@@ -29,21 +33,10 @@ func (h *dayHandler) Consume(line []byte) error {
 	return nil
 }
 
-func (h *dayHandler) Solve() error {
-
-	// Let's try the naive way
-	fmt.Printf("%s\n", h.grid)
-
-	if err := h.grid.Solve(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (h *dayHandler) AnswerPart1() int {
+	h.grid.ResetBFS()
 
-	return 0
+	return h.grid.BFS()
 }
 
 func (h *dayHandler) AnswerPart2() int {
