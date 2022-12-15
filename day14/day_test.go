@@ -10,10 +10,10 @@ import (
 
 const (
 	exampleAnswer1 = 24
-	exampleAnswer2 = 0
+	exampleAnswer2 = 93
 
 	realAnswer1 = 858
-	realAnswer2 = 0
+	realAnswer2 = 26845 // 1007 too low
 )
 
 func Test(t *testing.T) {
@@ -41,7 +41,7 @@ func Test(t *testing.T) {
 				require.NoError(t, err)
 				defer in.Close()
 
-				day := New()
+				day := New(false)
 				require.NoError(t, runner.ScanToHandler(day, in))
 				require.NoError(t, day.RunSand())
 				require.Equal(t, tt.part1, day.AnswerPart1())
@@ -54,10 +54,9 @@ func Test(t *testing.T) {
 				require.NoError(t, err)
 				defer in.Close()
 
-				day := New()
+				day := New(true)
 				require.NoError(t, runner.ScanToHandler(day, in))
-
-				//.NoError(t, day.Run(10000))
+				require.NoError(t, day.RunSand())
 				require.Equal(t, tt.part2, day.AnswerPart2())
 			})
 		})

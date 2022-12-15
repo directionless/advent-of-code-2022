@@ -34,6 +34,24 @@ func (g *Grid) SetYMin(y int) {
 	g.minY = y
 }
 
+func (g *Grid) SetYMax(y int) {
+	g.maxY = y
+}
+
+func (g *Grid) GetYMax() int {
+	return g.maxY
+}
+
+func (g *Grid) GetYMin() int {
+	return g.minY
+}
+
+func (g *Grid) SetIfEmpty(x, y int, v gridValue) {
+	if _, ok := g.grid[[2]int{x, y}]; !ok {
+		g.Set(x, y, v)
+	}
+}
+
 func (g *Grid) Set(x, y int, v gridValue) {
 	g.grid[[2]int{x, y}] = v
 
@@ -114,38 +132,38 @@ func (g *Grid) SetStraightLine(x1, y1, x2, y2 int, v gridValue) error {
 	}
 }
 
-func (g *Grid) GetCoordinates(x, y int) (int, int, bool) {
+func (g *Grid) GetCoordinates(x, y int) (int, int) {
 	if x > g.maxX || x < g.minX || y > g.maxY || y < g.minY {
-		return 0, 0, false
+		return x, y
 	}
 
 	if _, ok := g.grid[[2]int{x, y}]; !ok {
-		return 0, 0, false
+		return x, y
 	}
-	return x, y, true
+	return x, y
 }
 
-func (g *Grid) Up(x, y int) (int, int, bool) {
+func (g *Grid) Up(x, y int) (int, int) {
 	return g.GetCoordinates(x, y-1)
 }
 
-func (g *Grid) Down(x, y int) (int, int, bool) {
+func (g *Grid) Down(x, y int) (int, int) {
 	return g.GetCoordinates(x, y+1)
 }
 
-func (g *Grid) DownLeft(x, y int) (int, int, bool) {
+func (g *Grid) DownLeft(x, y int) (int, int) {
 	return g.GetCoordinates(x-1, y+1)
 }
 
-func (g *Grid) DownRight(x, y int) (int, int, bool) {
+func (g *Grid) DownRight(x, y int) (int, int) {
 	return g.GetCoordinates(x+1, y+1)
 }
 
-func (g *Grid) Left(x, y int) (int, int, bool) {
+func (g *Grid) Left(x, y int) (int, int) {
 	return g.GetCoordinates(x-1, y)
 }
 
-func (g *Grid) Right(x, y int) (int, int, bool) {
+func (g *Grid) Right(x, y int) (int, int) {
 	return g.GetCoordinates(x+1, y)
 }
 

@@ -14,13 +14,16 @@ const (
 )
 
 type dayHandler struct {
-	grid   *aocgrid.Grid
-	grains int
+	grid        *aocgrid.Grid
+	grains      int
+	secretFloor int
+	part2       bool
 }
 
-func New() *dayHandler {
+func New(part2 bool) *dayHandler {
 	h := &dayHandler{
-		grid: aocgrid.New(),
+		grid:  aocgrid.New(),
+		part2: part2,
 	}
 
 	h.grid.Set(sandStartX, sandStartY, SandSource)
@@ -65,12 +68,21 @@ func (h *dayHandler) RunSand() error {
 	h.grid.SetYMin(0)
 	h.grid.FillRemaining(Air)
 
+	// handling for part 2. Special y max!
+	if h.part2 {
+		h.secretFloor = h.grid.GetYMax() + 2
+	}
+
 	grains := 0
 	for {
 		grains += 1
 
 		fmt.Printf("grain number: %d\n", grains)
-		fmt.Println(h.grid)
+		//fmt.Println(h.grid)
+
+		if v := h.grid.Look(sandStartX, sandStartY); v != SandSource {
+			break
+		}
 
 		if !h.AddSand(grains, sandStartX, sandStartY) {
 			break
@@ -99,35 +111,57 @@ func (h *dayHandler) RunSand() error {
 // of sand is created back at the source.
 func (h *dayHandler) AddSand(grainNum, x, y int) bool {
 
-	down := h.grid.LookDown(x, y)
-	downLeft := h.grid.LookDownLeft(x, y)
-	downRight := h.grid.LookDownRight(x, y)
-
 	//fmt.Printf("grain number: %d\n", grainNum)
 	//fmt.Printf("x: %d, y: %d\n", x, y)
 	//fmt.Printf("down: %s, downleft: %s, downright: %s\n",
 	//	down, downLeft, downRight)
 	//fmt.Println(h.grid)
 
-	switch {
-	case down == Air:
-		dx, dy, _ := h.grid.Down(x, y)
-		return h.AddSand(grainNum, dx, dy)
+	// Part 2, expand the floor. This is somewhat inefficient -- we're adding a lot of
+	// floor. But it's the quick way to fit this not-great idiom. So here we are.
+	if h.part2 {
+		h.grid.SetIfEmpty(x-1, h.secretFloor, Rock)
+		h.grid.SetIfEmpty(x, h.secretFloor, Rock)
+		h.grid.SetIfEmpty(x+1, h.secretFloor, Rock)
+	}
 
-	case downLeft == Air:
-		dx, dy, _ := h.grid.DownLeft(x, y)
-		return h.AddSand(grainNum, dx, dy)
+	down := h.grid.LookDown(x, y)
+	downLeft := h.grid.LookDownLeft(x, y)
+	downRight := h.grid.LookDownRight(x, y)
 
-	case downRight == Air:
-		dx, dy, _ := h.grid.DownRight(x, y)
-		return h.AddSand(grainNum, dx, dy)
-
-	case down == nil || downLeft == nil || downRight == nil:
+	// Are we in the void? (part 1)
+	if h.grid.Look(x, y) == nil && y > h.secretFloor {
+		fmt.Println("IN VOID")
 		return false
 	}
 
-	h.grid.Set(x, y, Sand)
-	return true
+	// Are we blocked by rock or sand?
+	if (down == Rock || down == Sand) &&
+		(downLeft == Rock || downLeft == Sand) &&
+		(downRight == Rock || downRight == Sand) {
+		h.grid.Set(x, y, Sand)
+		return true
+	}
+
+	switch {
+	case down == Air || down == nil:
+		dx, dy := h.grid.Down(x, y)
+		return h.AddSand(grainNum, dx, dy)
+
+	case downLeft == Air || downLeft == nil:
+		dx, dy := h.grid.DownLeft(x, y)
+		return h.AddSand(grainNum, dx, dy)
+
+	case downRight == Air || downRight == nil:
+		dx, dy := h.grid.DownRight(x, y)
+		return h.AddSand(grainNum, dx, dy)
+	}
+
+	// Shouldn't be possible to get here:
+	fmt.Printf("SEPH: wtf %d,%d  down: %s, downLeft: %s, downRight: %s\n",
+		x, y, down, downLeft, downRight)
+	return false
+
 }
 
 func (h *dayHandler) AnswerPart1() int {
@@ -135,7 +169,7 @@ func (h *dayHandler) AnswerPart1() int {
 }
 
 func (h *dayHandler) AnswerPart2() int {
-	return 0
+	return h.grains
 }
 
 func (h *dayHandler) Print() {
