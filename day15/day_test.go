@@ -10,12 +10,14 @@ import (
 
 const (
 	examplePart1Row = 10
+	examplePart1Max = 20
 	exampleAnswer1  = 26
-	exampleAnswer2  = 0
+	exampleAnswer2  = 56000011 // x=14, y=11
 
 	realPart1Row = 2000000
+	realPart2Max = 4000000
 	realAnswer1  = 4961647
-	realAnswer2  = 0
+	realAnswer2  = 12274327017867
 )
 
 func Test(t *testing.T) {
@@ -25,11 +27,12 @@ func Test(t *testing.T) {
 		name  string
 		input string
 		p1row int
+		p2max int
 		part1 int
 		part2 int
 	}{
-		{"Example", "example.txt", examplePart1Row, exampleAnswer1, exampleAnswer2},
-		{"Real", "input.txt", realPart1Row, realAnswer1, realAnswer2},
+		{"Example", "example.txt", examplePart1Row, examplePart1Max, exampleAnswer1, exampleAnswer2},
+		{"Real", "input.txt", realPart1Row, realPart2Max, realAnswer1, realAnswer2},
 	}
 
 	for _, tt := range tests {
@@ -44,7 +47,7 @@ func Test(t *testing.T) {
 				require.NoError(t, err)
 				defer in.Close()
 
-				day := New(tt.p1row)
+				day := New(tt.p1row, tt.p2max)
 				require.NoError(t, runner.ScanToHandler(day, in))
 
 				require.Equal(t, tt.part1, day.AnswerPart1())
@@ -57,10 +60,9 @@ func Test(t *testing.T) {
 				require.NoError(t, err)
 				defer in.Close()
 
-				day := New(tt.p1row)
+				day := New(tt.p1row, tt.p2max)
 				require.NoError(t, runner.ScanToHandler(day, in))
 
-				//.NoError(t, day.Run(10000))
 				require.Equal(t, tt.part2, day.AnswerPart2())
 			})
 		})

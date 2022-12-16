@@ -14,13 +14,15 @@ type dayHandler struct {
 	grid     *grid
 	network  *network
 	part1Row int
+	part2Max int
 }
 
-func New(part1Row int) *dayHandler {
+func New(part1Row int, part2Max int) *dayHandler {
 	h := &dayHandler{
 		grid:     NewGrid(),
 		network:  NewNetwork(),
 		part1Row: part1Row,
+		part2Max: part2Max,
 	}
 
 	return h
@@ -31,6 +33,10 @@ var lineRe = regexp.MustCompile(`^Sensor at x=(-?\d+), y=(-?\d+): closest beacon
 
 func (h *dayHandler) Consume(line []byte) error {
 	if len(line) == 0 {
+		return nil
+	}
+
+	if line[0] == '#' {
 		return nil
 	}
 
@@ -65,14 +71,20 @@ func (h *dayHandler) Consume(line []byte) error {
 }
 
 func (h *dayHandler) AnswerPart1() int {
-	count, pretty := h.network.GetRowY(h.part1Row)
-	_ = pretty
+	count := h.network.GetRowY(h.part1Row)
 	//fmt.Println(pretty)
 	return count
 }
 
 func (h *dayHandler) AnswerPart2() int {
-	return 0
+	//fmt.Println(h.grid)
+
+	loc, err := h.network.FindHoles(h.part2Max)
+	if err != nil {
+		panic(err)
+	}
+
+	return loc.X*4000000 + loc.Y
 }
 
 func (h *dayHandler) Print() {
