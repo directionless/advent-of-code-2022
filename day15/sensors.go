@@ -100,7 +100,9 @@ type outerPointHolder interface {
 }
 
 // FindEdges finds the outer edges of the sensor coverage. This is defines using the
-// manhatten distance from the sensor to the nearest beacon.
+// manhatten distance from the sensor to the nearest beacon. The clever part here is
+// that we're finding the _outer_ edges. Inherently a hold in coverage is going to be
+// just outside something.
 func (s sensorType) FindEdges(oph outerPointHolder) {
 
 	for dy := 0; dy <= s.Distance; dy++ {
