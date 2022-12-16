@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// grid is way too inefficient to work for the real data. But it can be used to print
+// pretty pictures of the example.
 type grid struct {
 	detections map[location]location
 	covered    map[location]bool

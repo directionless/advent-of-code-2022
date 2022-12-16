@@ -64,7 +64,10 @@ func (h *dayHandler) Consume(line []byte) error {
 
 	//fmt.Printf("Beacon: %s, snsor: %s\n", beacon, sensor)
 
+	// Grid is too inefficient to use in real. But the pretty print is nice
+	//  for debugging examples
 	//h.grid.AddSensor(sensor, beacon)
+
 	h.network.AddDetection(sensor, beacon)
 
 	return nil
