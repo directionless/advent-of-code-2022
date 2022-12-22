@@ -10,10 +10,10 @@ import (
 
 const (
 	exampleAnswer1 = 152
-	exampleAnswer2 = 0
+	exampleAnswer2 = -1
 
 	realAnswer1 = 21208142603224
-	realAnswer2 = 0
+	realAnswer2 = 3882224466191
 )
 
 func Test(t *testing.T) {
@@ -58,7 +58,7 @@ func Test(t *testing.T) {
 				day := New()
 				require.NoError(t, runner.ScanToHandler(day, in))
 
-				//.NoError(t, day.Run(10000))
+				require.NoError(t, day.SearchPart2())
 				require.Equal(t, tt.part2, day.AnswerPart2())
 			})
 		})
