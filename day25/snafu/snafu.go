@@ -19,13 +19,15 @@ const (
 	maxExponentSize = 20
 )
 
-var segmentMap = map[int]string{
-	-2: "=",
-	-1: "-",
-	0:  "0",
-	1:  "1",
-	2:  "2",
-}
+var (
+	segmentMap = map[int]string{
+		-2: "=",
+		-1: "-",
+		0:  "0",
+		1:  "1",
+		2:  "2",
+	}
+)
 
 func FromInt(num int) (string, error) {
 	//maxE, err := maxExp(num)
