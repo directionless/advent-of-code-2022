@@ -48,7 +48,7 @@ func (n *network) GetHole() (location, error) {
 	for loc, c := range n.outerPoints {
 		count--
 
-		if count%1000 == 0 {
+		if count%100000 == 0 {
 			fmt.Printf("   %d left to examine\n", count)
 		}
 
