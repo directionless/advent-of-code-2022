@@ -13,30 +13,8 @@ const (
 	exampleAnswer2 = 281
 
 	realAnswer1 = 54968
-	realAnswer2 = 0 // 54110 is too high
+	realAnswer2 = 54094
 )
-
-func Test_wordToNum(t *testing.T) {
-	t.Parallel()
-
-	var tests = []struct {
-		input    string
-		expected string
-	}{
-		{"two1nine", "219"},
-		{"eightwothree", "8wo3"},
-	}
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.input, func(t *testing.T) {
-			t.Parallel()
-			linep2 := findNumberWords.ReplaceAllFunc([]byte(tt.input), wordToNum)
-
-			require.Equal(t, []byte(tt.expected), linep2)
-		})
-	}
-
-}
 
 func Test(t *testing.T) {
 	t.Parallel()
