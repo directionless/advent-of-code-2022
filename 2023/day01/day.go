@@ -41,13 +41,13 @@ func (h *dayHandler) Consume(line []byte) error {
 }
 
 func (h *dayHandler) lineToNum(line string, withWords bool) (int, error) {
-	var extras []map[string]any
+	m := numbersInt
 	if withWords {
-		extras = []map[string]any{numbersStr}
+		m = numbersCombined
 	}
 
-	_, first := findFirst(line, numbersInt, extras...)
-	_, last := findLast(line, numbersInt, extras...)
+	_, first := findFirst(line, m)
+	_, last := findLast(line, m)
 
 	if last == nil {
 		last = first

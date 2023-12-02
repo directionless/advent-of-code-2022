@@ -1,6 +1,8 @@
 package day01
 
 import (
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -38,20 +40,37 @@ func Test_findFirstLast(t *testing.T) {
 		t.Run("", func(t *testing.T) {
 			t.Parallel()
 
-			var extras []map[string]any
+			m := numbersInt
 			if tt.includeWords {
-				extras = []map[string]any{numbersStr}
+				m = numbersCombined
 			}
 
-			firstK, firstV := findFirst(tt.in, numbersInt, extras...)
-			require.Equal(t, tt.firstK, firstK, "first key")
-			require.Equal(t, tt.firstV, firstV, "first value")
+			{
+				firstK, firstV := findFirst(tt.in, m)
+				require.Equal(t, tt.firstK, firstK, "first key")
+				require.Equal(t, tt.firstV, firstV, "first value")
+			}
 
-			lastK, lastV := findLast(tt.in, numbersInt, extras...)
-			require.Equal(t, tt.lastK, lastK, "last key")
-			require.Equal(t, tt.lastV, lastV, "last value")
+			{
+				lastK, lastV := findLast(tt.in, m)
+				require.Equal(t, tt.lastK, lastK, "last key")
+				require.Equal(t, tt.lastV, lastV, "last value")
+			}
 
 		})
 	}
+}
 
+func Benchmark_findFirst(b *testing.B) {
+	// load data
+	data, err := os.ReadFile("input.txt")
+	require.NoError(b, err)
+	lines := strings.Split(string(data), "\n")
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		line := lines[n%len(lines)]
+		findFirst(line, numbersCombined)
+	}
 }

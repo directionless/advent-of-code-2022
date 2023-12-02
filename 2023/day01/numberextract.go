@@ -1,8 +1,6 @@
 package day01
 
 import (
-	"fmt"
-	"regexp"
 	"strings"
 )
 
@@ -21,6 +19,29 @@ var (
 	}
 
 	numbersStr = map[string]any{
+		"zero":  0,
+		"one":   1,
+		"two":   2,
+		"three": 3,
+		"four":  4,
+		"five":  5,
+		"six":   6,
+		"seven": 7,
+		"eight": 8,
+		"nine":  9,
+	}
+
+	numbersCombined = map[string]any{
+		"0":     0,
+		"1":     1,
+		"2":     2,
+		"3":     3,
+		"4":     4,
+		"5":     5,
+		"6":     6,
+		"7":     7,
+		"8":     8,
+		"9":     9,
 		"zero":  0,
 		"one":   1,
 		"two":   2,
@@ -67,40 +88,63 @@ func valFor(k string, m map[string]any, extras ...map[string]any) any {
 	return nil
 }
 
-func findFirst(s string, m map[string]any, extras ...map[string]any) (string, any) {
-	re := regexp.MustCompile(fmt.Sprintf("(%s)", strings.Join(mapKeys(m, extras...), "|")))
+func findFirst(s string, m map[string]any) (string, any) {
+	firstIndex := -1
+	var firstKey string
+	var firstVal any
 
-	// Only need the first match
-	if matches := re.FindAllString(s, 1); len(matches) > 0 {
-		return matches[0], valFor(matches[0], m, extras...)
+	for k, v := range m {
+		i := strings.Index(s, k)
+		switch {
+		case i < 0:
+			// not found
+			continue
+		case firstIndex < 0:
+			firstIndex = i
+			firstKey = k
+			firstVal = v
+
+		case i < firstIndex:
+			firstIndex = i
+			firstKey = k
+			firstVal = v
+		}
+
+		if i == 0 {
+			// Can't be anything smaller
+			return k, v
+		}
 	}
 
-	return "", nil
+	return firstKey, firstVal
 }
 
-func findLast(s string, m map[string]any, extras ...map[string]any) (string, any) {
+func findLast(s string, m map[string]any) (string, any) {
+	lastIndex := -1
+	var lastKey string
+	var lastVal any
 
-	expression := reverse(strings.Join(mapKeys(m, extras...), "|"))
+	for k, v := range m {
+		i := strings.LastIndex(s, k)
+		switch {
+		case i < 0:
+			// not found
+			continue
+		case lastIndex < 0:
+			lastIndex = i
+			lastKey = k
+			lastVal = v
+		case i > lastIndex:
+			lastIndex = i
+			lastKey = k
+			lastVal = v
+		}
 
-	re := regexp.MustCompile(fmt.Sprintf("(%s)", expression))
-
-	// Only need the first match
-	if matches := re.FindAllString(reverse(s), 1); len(matches) > 0 {
-		s := reverse(matches[0])
-		return s, valFor(s, m, extras...)
+		if i == len(s)-1 {
+			// Can't be anything larger
+			return k, v
+		}
 	}
 
-	return "", nil
-}
-
-// reverse reverses a string. From https://www.geeksforgeeks.org/how-to-reverse-a-string-in-golang
-func reverse(s string) string {
-	rns := []rune(s)
-	// swap the letters of the string,
-	// like first with last and so on.
-	for i, j := 0, len(rns)-1; i < j; i, j = i+1, j-1 {
-		rns[i], rns[j] = rns[j], rns[i]
-	}
-
-	return string(rns)
+	return lastKey, lastVal
 }
