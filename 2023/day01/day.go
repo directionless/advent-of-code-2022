@@ -14,7 +14,6 @@ func New() *dayHandler {
 	h := &dayHandler{}
 
 	return h
-
 }
 
 func (h *dayHandler) Consume(line []byte) error {
@@ -37,6 +36,7 @@ func (h *dayHandler) Consume(line []byte) error {
 	}
 
 	h.running_total_p2 += i2
+
 	return nil
 }
 
@@ -61,7 +61,6 @@ func (h *dayHandler) lineToNum(line string, withWords bool) (int, error) {
 	}
 
 	return i, nil
-
 }
 
 func (h *dayHandler) AnswerPart1() any {

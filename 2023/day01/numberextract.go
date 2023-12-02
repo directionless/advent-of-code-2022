@@ -8,6 +8,7 @@ import (
 
 var (
 	numbersInt = map[string]any{
+		"0": 0,
 		"1": 1,
 		"2": 2,
 		"3": 3,
@@ -20,6 +21,7 @@ var (
 	}
 
 	numbersStr = map[string]any{
+		"zero":  0,
 		"one":   1,
 		"two":   2,
 		"three": 3,
@@ -30,8 +32,6 @@ var (
 		"eight": 8,
 		"nine":  9,
 	}
-
-	numbersIntRE = regexp.MustCompile(fmt.Sprintf("(%s)", strings.Join(mapKeys(numbersInt), "|")))
 )
 
 func mapKeys(m map[string]any, extras ...map[string]any) []string {
