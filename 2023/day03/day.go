@@ -10,6 +10,7 @@ type dayHandler struct {
 	nextLine    *lineInfo
 
 	part1_total int
+	part2_total int
 }
 
 func New() *dayHandler {
@@ -42,7 +43,7 @@ func (h *dayHandler) Consume(line []byte) error {
 	h.currentLine = h.nextLine
 	h.nextLine = li
 
-	matchingNums, err := solveLine(h.prevLine, h.currentLine, h.nextLine)
+	matchingNums, gearRatios, err := solveLine(h.prevLine, h.currentLine, h.nextLine)
 	if err != nil {
 		return fmt.Errorf(`solving line "%s": %w`, line, err)
 	}
@@ -50,6 +51,8 @@ func (h *dayHandler) Consume(line []byte) error {
 	for _, n := range matchingNums {
 		h.part1_total += n
 	}
+
+	h.part2_total += gearRatios
 
 	return nil
 }
@@ -60,7 +63,7 @@ func (h *dayHandler) Solve() error {
 	h.currentLine = h.nextLine
 	h.nextLine = emptyLine
 
-	matchingNums, err := solveLine(h.prevLine, h.currentLine, h.nextLine)
+	matchingNums, gearRatios, err := solveLine(h.prevLine, h.currentLine, h.nextLine)
 	if err != nil {
 		return fmt.Errorf(`solving EOF: %w`, err)
 	}
@@ -69,21 +72,18 @@ func (h *dayHandler) Solve() error {
 		h.part1_total += n
 	}
 
+	h.part2_total += gearRatios
+
 	return nil
 }
 
 // solveLine acts on the current 3 lines
-func solveLine(prevLine, curLine, nextLine *lineInfo) ([]int, error) {
+func solveLine(prevLine, curLine, nextLine *lineInfo) ([]int, int, error) {
 	// The first time we're called, we're not actually ready to solve. So early return.
 	if curLine.Empty() {
-		return nil, nil
+		return nil, 0, nil
 	}
 	fmt.Printf("\n\nSolving\n  %s\n> %s\n  %s\n\n", prevLine, curLine, nextLine)
-
-	// If the current line has no numbers, we can skip
-	if len(curLine.Numbers()) == 0 {
-		return nil, nil
-	}
 
 	symbolIndexes := []int{}
 	for _, li := range []*lineInfo{prevLine, curLine, nextLine} {
@@ -93,7 +93,28 @@ func solveLine(prevLine, curLine, nextLine *lineInfo) ([]int, error) {
 	matches := curLine.NumbersTouching(symbolIndexes)
 	//fmt.Printf("matching numbers: %v\n", matches)
 
-	return matches, nil
+	// Part2
+	//
+	// Lets fine the gears. This is slightly inefficient, because we end up calling `NumbersTouching`
+	// twice. But, :shrug: short enough
+	gearRatios := 0
+	fmt.Printf("Gear Index: %v\n", curLine.GearIndexes())
+
+	for _, gearIdx := range curLine.GearIndexes() {
+		nearNumbers := []int{}
+		for _, li := range []*lineInfo{prevLine, curLine, nextLine} {
+			nearNumbers = append(nearNumbers, li.NumbersTouching([]int{gearIdx})...)
+		}
+
+		if len(nearNumbers) == 2 {
+			gearRatio := nearNumbers[0] * nearNumbers[1]
+			fmt.Printf("Found gear: idx %d: %d and %d -- ratio %d\n", gearIdx, nearNumbers[0], nearNumbers[1], gearRatio)
+			gearRatios += gearRatio
+		}
+
+	}
+
+	return matches, gearRatios, nil
 }
 
 func (h *dayHandler) AnswerPart1() any {
@@ -101,7 +122,7 @@ func (h *dayHandler) AnswerPart1() any {
 }
 
 func (h *dayHandler) AnswerPart2() any {
-	return nil
+	return h.part2_total
 }
 
 func (h *dayHandler) Print() {

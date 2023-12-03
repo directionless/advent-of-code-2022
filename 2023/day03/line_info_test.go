@@ -94,3 +94,33 @@ func Test_parseLineTouching(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseLineGearIndexes(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		line        string
+		gearIndexes []int
+	}{
+		{line: ""},
+		{line: ".........."},
+		{line: "...*......", gearIndexes: []int{3}},
+		{line: "617*......", gearIndexes: []int{3}},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+
+			actual, err := parseLine(tt.line)
+			require.NoError(t, err)
+
+			if tt.gearIndexes == nil {
+				require.Empty(t, actual.GearIndexes())
+			} else {
+				require.Equal(t, tt.gearIndexes, actual.GearIndexes())
+			}
+		})
+	}
+}

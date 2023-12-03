@@ -10,6 +10,7 @@ import (
 var (
 	spaceChars  = []rune{'.'}
 	symbolChars = []rune{'#', '$', '%', '&', '*', '+', '-', '/', '=', '@'}
+	gearChar    = '*'
 	numRE       = regexp.MustCompile(`([0-9]+)`)
 )
 
@@ -18,6 +19,7 @@ type lineInfo struct {
 	symbolPositions []int
 	numbers         []int
 	numberIndexes   [][2]int
+	gearIndexes     []int
 }
 
 var emptyLine = &lineInfo{}
@@ -28,9 +30,7 @@ func parseLine(line string) (*lineInfo, error) {
 	}
 
 	li := &lineInfo{
-		line:            line,
-		symbolPositions: []int{},
-		numbers:         []int{},
+		line: line,
 	}
 
 	for i, r := range line {
@@ -39,6 +39,9 @@ func parseLine(line string) (*lineInfo, error) {
 			continue
 		case slices.Contains(symbolChars, r):
 			li.symbolPositions = append(li.symbolPositions, i)
+			if r == gearChar {
+				li.gearIndexes = append(li.gearIndexes, i)
+			}
 		case '0' <= r && r <= '9':
 			// We've found a number. Skip it, because we're going to regex it later. (lazy!)
 			continue
@@ -79,6 +82,7 @@ func (li lineInfo) Empty() bool {
 func (li lineInfo) String() string         { return li.line }
 func (li lineInfo) SymbolPositions() []int { return li.symbolPositions }
 func (li lineInfo) Numbers() []int         { return li.numbers }
+func (li lineInfo) GearIndexes() []int     { return li.gearIndexes }
 
 func (li lineInfo) NumbersTouching(symIndexes []int) []int {
 	nums := []int{}
