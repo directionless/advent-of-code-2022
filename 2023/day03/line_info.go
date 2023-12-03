@@ -71,3 +71,32 @@ func parseLine(line string) (*lineInfo, error) {
 
 	return li, nil
 }
+
+func (li lineInfo) Empty() bool {
+	return len(li.line) == 0
+}
+
+func (li lineInfo) String() string         { return li.line }
+func (li lineInfo) SymbolPositions() []int { return li.symbolPositions }
+func (li lineInfo) Numbers() []int         { return li.numbers }
+
+func (li lineInfo) NumbersTouching(symIndexes []int) []int {
+	nums := []int{}
+	for i, _ := range li.numberIndexes {
+		// fmt.Printf("Checking %d against %d: s:%d e:%d\n", symIdx, li.numbers[i], indexes[0], indexes[1])
+		if li.numberTouching(i, symIndexes) {
+			nums = append(nums, li.numbers[i])
+		}
+	}
+	return nums
+}
+
+func (li lineInfo) numberTouching(numberIndex int, symIndexes []int) bool {
+	indexes := li.numberIndexes[numberIndex]
+	for _, symIdx := range symIndexes {
+		if indexes[0]-1 <= symIdx && symIdx <= indexes[1] {
+			return true
+		}
+	}
+	return false
+}

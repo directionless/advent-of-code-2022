@@ -53,3 +53,44 @@ func Test_parseLine(t *testing.T) {
 		})
 	}
 }
+
+func Test_parseLineTouching(t *testing.T) {
+	t.Parallel()
+
+	var tests = []struct {
+		line      string
+		symbolIdx []int
+		expected  []int
+	}{
+		{line: "", symbolIdx: []int{5}},
+		{line: "..........", symbolIdx: []int{5}},
+		{line: "467.114...", symbolIdx: []int{0}, expected: []int{467}},
+		{line: "467.114...", symbolIdx: []int{3}, expected: []int{467, 114}},
+		{line: "467.114...", symbolIdx: []int{7}, expected: []int{114}},
+		{line: "467.114...", symbolIdx: []int{10}},
+
+		{line: "..2..", symbolIdx: []int{0}, expected: []int{}},
+		{line: "..2..", symbolIdx: []int{1}, expected: []int{2}},
+		{line: "..2..", symbolIdx: []int{2}, expected: []int{2}},
+		{line: "..2..", symbolIdx: []int{3}, expected: []int{2}},
+		{line: "..2..", symbolIdx: []int{4}, expected: []int{}},
+	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run("", func(t *testing.T) {
+			t.Parallel()
+
+			actual, err := parseLine(tt.line)
+			require.NoError(t, err)
+
+			nums := actual.NumbersTouching(tt.symbolIdx)
+
+			if tt.expected == nil {
+				require.Empty(t, nums)
+			} else {
+				require.Equal(t, tt.expected, nums)
+			}
+		})
+	}
+}
