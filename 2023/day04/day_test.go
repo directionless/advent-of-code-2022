@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	exampleAnswer1 = -1
+	exampleAnswer1 = 13
 	exampleAnswer2 = -1
 
-	realAnswer1 = -1
+	realAnswer1 = 26426
 	realAnswer2 = -1
 )
 
