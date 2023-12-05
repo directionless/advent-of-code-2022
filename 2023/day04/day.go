@@ -7,11 +7,15 @@ import (
 )
 
 type dayHandler struct {
-	part1_value int
+	part1_value       int
+	idx               int
+	part2_card_counts map[int]int
 }
 
 func New() *dayHandler {
-	h := &dayHandler{}
+	h := &dayHandler{
+		part2_card_counts: make(map[int]int, 0),
+	}
 
 	return h
 }
@@ -21,12 +25,28 @@ func (h *dayHandler) Consume(line []byte) error {
 		return nil
 	}
 
-	cardValue, err := cardValue(string(line))
+	// Increment _after_ we loop
+	defer func() { h.idx += 1 }()
+
+	// We always have at least _1_ copy of a scratch card.
+	h.part2_card_counts[h.idx] += 1
+
+	cardMatches, err := cardValue(string(line))
 	if err != nil {
 		return fmt.Errorf(`processing "%s": %w`, line, err)
 	}
 
-	h.part1_value += cardValue
+	h.part1_value += valueForMatches(cardMatches)
+
+	// part2
+	//
+	// These elves, this is nonsense. So when a card has matches, it increases
+	// the number of subsequent cards. This seems kinda bonkers. But hey...
+	fmt.Printf("Card %d, has %d copies\n", h.idx+1, h.part2_card_counts[h.idx])
+	for i := 1; i <= cardMatches; i++ {
+		// Ever time a card has N matches, it increases the next N card counts by 1.
+		h.part2_card_counts[h.idx+i] += h.part2_card_counts[h.idx]
+	}
 
 	return nil
 }
@@ -40,12 +60,26 @@ func (h *dayHandler) AnswerPart1() any {
 }
 
 func (h *dayHandler) AnswerPart2() any {
-	return nil
+	sum := 0
+	for _, n := range h.part2_card_counts {
+		sum += n
+	}
+	return sum
 }
 
 func (h *dayHandler) Print() {
 	fmt.Printf("Part1: ???: %d\n", h.AnswerPart1())
 	fmt.Printf("Part2: ???: %d\n", h.AnswerPart2())
+}
+
+func valueForMatches(matches int) int {
+	// go doesn't have a quick power function (math is all floaty). Since there are at most
+	// 10 matches we're going to be really sloppy and hardcode.
+	if matches == 0 {
+		return 0
+	}
+
+	return 1 << (matches - 1)
 }
 
 var numRE = regexp.MustCompile(`([0-9]+)`)
@@ -77,19 +111,14 @@ func cardValue(line string) (int, error) {
 		}
 	}
 
-	fmt.Printf("Solving\n%s\n", line)
+	fmt.Printf("\nSolving\n%s\n", line)
 	fmt.Printf("win: %v\n my: %v\n", winNumbers, myNumbers)
 	fmt.Println(parts[0], "num matches:", matches)
-	// go doesn't have a quick power function (math is all floaty). Since there are at most
-	// 10 matches we're going to be really sloppy and hardcode.
-	if matches == 0 {
-		return 0, nil
-	}
 
 	if matches > 10 {
 		return 0, fmt.Errorf("too many matches. Had %d", matches)
 	}
 
-	return 1 << (matches - 1), nil
+	return matches, nil
 
 }

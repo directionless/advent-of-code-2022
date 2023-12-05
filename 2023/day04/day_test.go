@@ -10,10 +10,10 @@ import (
 
 const (
 	exampleAnswer1 = 13
-	exampleAnswer2 = -1
+	exampleAnswer2 = 30
 
 	realAnswer1 = 26426
-	realAnswer2 = -1
+	realAnswer2 = 6227972
 )
 
 func Test(t *testing.T) {
