@@ -2,7 +2,6 @@ package day05
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -24,8 +23,10 @@ type dayHandler struct {
 	currentMap        []thingThatNeedsMap
 	runningSeedValues map[int]int
 
-	part1Answer any
-	part2Answer any
+	part1Answer int
+	part2Answer int
+
+	almanacMaps [][]thingThatNeedsMap
 }
 
 func New() *dayHandler {
@@ -41,10 +42,6 @@ func (h *dayHandler) Consume(line []byte) error {
 
 	// The maps show up in the order they're needed. At least for part 1. Yay
 	if bytes.HasPrefix(line, []byte("seeds:")) {
-		if len(h.seeds) != 0 {
-			return errors.New("got a second seeds declaration")
-		}
-
 		seeds := extract.NumbersFromLine(line)
 		h.seeds = make([]int, len(seeds))
 		h.runningSeedValues = make(map[int]int, len(seeds))
@@ -53,7 +50,6 @@ func (h *dayHandler) Consume(line []byte) error {
 			h.runningSeedValues[s.Int] = s.Int
 		}
 
-		// This only handles single line of seeds, We could probably just drop this. But :shrug:
 		return nil
 	}
 
@@ -87,16 +83,7 @@ func (h *dayHandler) processCompletedMap() error {
 
 	fmt.Printf("currently processing map %s\n", h.currentMapName)
 	sort.Sort(bySrcStart(h.currentMap))
-	//spew.Dump(h.currentMap)
-	for seed, val := range h.runningSeedValues {
-		for _, thing := range h.currentMap {
-			if newVal := thing.Contains(val); newVal >= 0 {
-				//fmt.Printf("seed %d is in thing: %s. Value %d -> %d\n", seed, thing, val, newVal)
-				h.runningSeedValues[seed] = newVal
-			}
-		}
-	}
-
+	h.almanacMaps = append(h.almanacMaps, h.currentMap)
 	return nil
 }
 
@@ -111,13 +98,26 @@ func (h *dayHandler) Solve() error {
 }
 
 func (h *dayHandler) AnswerPart1() any {
-	// find the lowest seed value, which is location
 	lowest := -1
-	for seed, location := range h.runningSeedValues {
-		fmt.Printf("seed %d is in location %d\n", seed, location)
-		if location < lowest || lowest == -1 {
-			lowest = location
 
+	for _, val := range h.seeds {
+		seed := val
+		for _, almanacMap := range h.almanacMaps {
+			//fmt.Printf("testing almanac that has %s\n", almanacMap[0])
+		NextAlmanac:
+			for _, thing := range almanacMap {
+				//fmt.Printf("seed %d now testing thing %d: %s\n", seed, i, thing)
+				if newVal := thing.Contains(val); newVal >= 0 {
+					fmt.Printf("seed %d is in thing: %s. Value %d -> %d\n", seed, thing, val, newVal)
+					val = newVal
+					break NextAlmanac
+				}
+			}
+		}
+
+		if val < lowest || lowest == -1 {
+			fmt.Printf("seed %d has new lowest %d\n", seed, val)
+			lowest = val
 		}
 	}
 
