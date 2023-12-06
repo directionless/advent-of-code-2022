@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/directionless/advent-of-code-2022/2023/util/extract"
 )
 
@@ -13,8 +14,8 @@ const (
 	ExampleAnswer1 = 35
 	ExampleAnswer2 = 289863851
 
-	RealAnswer1 = -1
-	RealAnswer2 = -1
+	RealAnswer1 = 289863851
+	RealAnswer2 = 60568880
 )
 
 type dayHandler struct {
@@ -100,6 +101,8 @@ func (h *dayHandler) Solve() error {
 func (h *dayHandler) AnswerPart1() any {
 	lowest := -1
 
+	spew.Dump(h.almanacMaps)
+
 	for _, val := range h.seeds {
 		seed := val
 		for _, almanacMap := range h.almanacMaps {
@@ -125,8 +128,47 @@ func (h *dayHandler) AnswerPart1() any {
 
 }
 
+func (h *dayHandler) AnswerPart2Backwards() any {
+
+	for i := len(h.almanacMaps) - 1; i >= 0; i-- {
+		almanacMap := h.almanacMaps[i]
+		_ = almanacMap
+	}
+
+	return nil
+}
+
+// AnswerPart2 is a brute force approach. But it works. It takes 7 minutes
 func (h *dayHandler) AnswerPart2() any {
-	return h.part2Answer
+	lowest := -1
+
+	// So many seeds. This might not work. Let's find out!
+	for i := 0; i < len(h.seeds); i += 2 {
+		fmt.Printf("Starting seed batch %d, len %d\n", h.seeds[i], h.seeds[i+1])
+		for j := 0; j < h.seeds[i+1]; j += 1 {
+			seed := h.seeds[i] + j
+			val := seed
+			for _, almanacMap := range h.almanacMaps {
+				//fmt.Printf("testing almanac that has %s\n", almanacMap[0])
+			NextAlmanac:
+				for _, thing := range almanacMap {
+					//fmt.Printf("seed %d now testing thing %d: %s\n", seed, i, thing)
+					if newVal := thing.Contains(val); newVal >= 0 {
+						//fmt.Printf("seed %d is in thing: %s. Value %d -> %d\n", seed, thing, val, newVal)
+						val = newVal
+						break NextAlmanac
+					}
+				}
+			}
+
+			if val < lowest || lowest == -1 {
+				fmt.Printf("seed %d has new lowest %d\n", seed, val)
+				lowest = val
+			}
+		}
+	}
+
+	return lowest
 
 }
 

@@ -42,6 +42,10 @@ func (t thingThatNeedsMap) Contains(n int) int {
 	return -1
 }
 
+func (t thingThatNeedsMap) DestContains(n int) bool {
+	return t.dstStart <= n && n < t.dstStart+t.length
+}
+
 type bySrcStart []thingThatNeedsMap
 
 // Len is part of sort.Interface.
