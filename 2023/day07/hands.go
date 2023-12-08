@@ -1,24 +1,28 @@
 package day07
 
 import (
+	"bytes"
 	"fmt"
 )
 
-type comparableHand [5]byte
-
 type Hand struct {
+	Bid        int
 	val        handValue
-	comparable comparableHand
+	comparable []byte
 }
 
-func HandFromBytes(in []byte) Hand {
+func HandFromBytes(in []byte, bid int) Hand {
 	if len(in) != 5 {
 		panic("This is not a hand. Does not have 5 cards")
 	}
 
+	val := valueFromHand(in)
+
 	return Hand{
-		val: valueFromHand(in),
-		comparable: [5]byte{
+		Bid: bid,
+		val: val,
+		comparable: []byte{
+			byte(val),
 			byteToComparable(in[0]),
 			byteToComparable(in[1]),
 			byteToComparable(in[2]),
@@ -30,12 +34,16 @@ func HandFromBytes(in []byte) Hand {
 
 func (h Hand) String() string {
 	return fmt.Sprintf("%s", []byte{
-		comparableToByte(h.comparable[0]),
 		comparableToByte(h.comparable[1]),
 		comparableToByte(h.comparable[2]),
 		comparableToByte(h.comparable[3]),
 		comparableToByte(h.comparable[4]),
+		comparableToByte(h.comparable[5]),
 	})
+}
+
+func (h Hand) LexComparable() []byte {
+	return h.comparable
 }
 
 func byteToComparable(in byte) byte {
@@ -43,49 +51,55 @@ func byteToComparable(in byte) byte {
 	case byte('2') <= in && in <= byte('9'):
 		return in
 	case in == byte('T'):
-		return byte('9') + 1
+		return byte('a')
 	case in == byte('J'):
-		return byte('9') + 2
+		return byte('b')
 	case in == byte('Q'):
-		return byte('9') + 3
+		return byte('c')
 	case in == byte('K'):
-		return byte('9') + 4
+		return byte('d')
 	case in == byte('A'):
-		return byte('9') + 5
+		return byte('e')
 	}
 
-	panic("This is not an known card")
+	panic("This is not an known card -- byteToComparable")
 }
 
 func comparableToByte(in byte) byte {
 	switch {
 	case byte('2') <= in && in <= byte('9'):
 		return in
-	case in == byte('9')+1:
+	case in == byte('a'):
 		return byte('T')
-	case in == byte('9')+2:
+	case in == byte('b'):
 		return byte('J')
-	case in == byte('9')+3:
+	case in == byte('c'):
 		return byte('Q')
-	case in == byte('9')+4:
+	case in == byte('d'):
 		return byte('K')
-	case in == byte('9')+5:
+	case in == byte('e'):
 		return byte('A')
 	}
 
-	panic("This is not an known card")
+	panic("This is not an known card -- comparableToByte")
 }
 
-type handValue int
+// Compare compares hands
+// The result will be 0 if a == b, -1 if a < b, and +1 if a > b
+func CompareHands(a, b Hand) int {
+	return bytes.Compare(a.LexComparable(), b.LexComparable())
+}
+
+type handValue byte
 
 const (
-	highCard     handValue = 0
-	onePair      handValue = 1
-	twoPair      handValue = 2
-	threeOfAKind handValue = 3
-	fullHouse    handValue = 4
-	fourOfAKind  handValue = 5
-	fiveOfAKind  handValue = 6
+	highCard     handValue = handValue('a')
+	onePair      handValue = handValue('b')
+	twoPair      handValue = handValue('c')
+	threeOfAKind handValue = handValue('d')
+	fullHouse    handValue = handValue('e')
+	fourOfAKind  handValue = handValue('f')
+	fiveOfAKind  handValue = handValue('g')
 )
 
 func valueFromHand(in []byte) handValue {
@@ -134,4 +148,21 @@ func valueFromHand(in []byte) handValue {
 
 	fmt.Printf("in: %s;  counts: %v; pairs: %d; triples: %d\n", in, counts, pairs, triples)
 	panic("unable to calculate hand value")
+}
+
+type handSorter []Hand
+
+// Len is part of sort.Interface.
+func (s handSorter) Len() int {
+	return len(s)
+}
+
+// Swap is part of sort.Interface.
+func (s handSorter) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+// Less is part of sort.Interface. It is implemented by calling the "by" closure in the sorter.
+func (s handSorter) Less(i, j int) bool {
+	return CompareHands(s[i], s[j]) < 0
 }
