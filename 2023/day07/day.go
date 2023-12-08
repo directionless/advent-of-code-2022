@@ -9,17 +9,14 @@ import (
 
 const (
 	ExampleAnswer1 = 6440
-	ExampleAnswer2 = -1
+	ExampleAnswer2 = 5905
 
 	RealAnswer1 = 253954294
-	RealAnswer2 = -1
+	RealAnswer2 = 254837398 // 254141271 too low
 )
 
 type dayHandler struct {
 	hands []Hand
-
-	part1Answer any
-	part2Answer any
 }
 
 func New() *dayHandler {
@@ -51,17 +48,18 @@ func (h *dayHandler) Consume(line []byte) error {
 // Solve is called when the input is done being Consumed. Some puzzle can be solved entirely
 // in Consume, line by line. Others need an additional step
 func (h *dayHandler) Solve() error {
-	sort.Sort(handSorter(h.hands))
-
-	//for _, hand := range h.hands {
-	//	fmt.Printf("%s: %s\n", hand.String(), hand.LexComparable())
-	//}
 
 	return nil
 
 }
 
 func (h *dayHandler) AnswerPart1() any {
+	sort.Sort(handSorter1(h.hands))
+
+	//for _, hand := range h.hands {
+	//	fmt.Printf("%s: %s\n", hand.String(), hand.LexComparable())
+	//}
+
 	// Now, you can determine the total winnings of this set of hands by adding up the result of multiplying each hand's bid with its rank (765 * 1 + 220 * 2 + 28 * 3 + 684 * 4 + 483 * 5). So the total winnings in this example are 6440.
 	winnings := 0
 	for i, hand := range h.hands {
@@ -75,7 +73,20 @@ func (h *dayHandler) AnswerPart1() any {
 }
 
 func (h *dayHandler) AnswerPart2() any {
-	return h.part2Answer
+	sort.Sort(handSorter2(h.hands))
+
+	//for _, hand := range h.hands {
+	//	fmt.Printf("%s: %s\n", hand.String(), hand.LexComparable2())
+	//}
+
+	winnings := 0
+	for i, hand := range h.hands {
+		rank := i + 1
+		winnings += rank * hand.Bid
+
+	}
+
+	return winnings
 
 }
 
