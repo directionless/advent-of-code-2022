@@ -18,7 +18,7 @@ func Test(t *testing.T) {
 		part2           any
 		p2inputOverride string
 	}{
-		{"Example", "example.txt", ExampleAnswer1, ExampleAnswer2, ""},
+		{"Example", "example.txt", ExampleAnswer1, ExampleAnswer2, "example2.txt"},
 		{"Real", "input.txt", RealAnswer1, RealAnswer2, ""},
 	}
 

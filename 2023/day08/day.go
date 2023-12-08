@@ -2,11 +2,14 @@ package day08
 
 import (
 	"fmt"
+
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 )
 
 const (
-	ExampleAnswer1 = -1
-	ExampleAnswer2 = -1
+	ExampleAnswer1 = 6
+	ExampleAnswer2 = 6
 
 	RealAnswer1 = 12737
 	RealAnswer2 = -1
@@ -56,7 +59,6 @@ func (h *dayHandler) Solve() error {
 }
 
 func (h *dayHandler) AnswerPart1() any {
-
 	for _, loc := range h.desertMap {
 		fmt.Println(loc.DebugString())
 	}
@@ -91,7 +93,59 @@ func (h *dayHandler) AnswerPart1() any {
 }
 
 func (h *dayHandler) AnswerPart2() any {
-	return h.part2Answer
+	locations := []locationType{}
+	for name, loc := range h.desertMap {
+		if name[2] == byte('A') {
+			locations = append(locations, loc)
+		}
+	}
+
+	fmt.Println("Starting at:")
+	for _, loc := range locations {
+		fmt.Println(loc.DebugString())
+	}
+
+	p := message.NewPrinter(language.English)
+
+	numberOfSteps := 0
+	for {
+		solvedCount := 0
+
+		if numberOfSteps%100_000_000 == 0 {
+			p.Printf("step %d\n", numberOfSteps)
+			for _, loc := range locations {
+				fmt.Println(loc.DebugString())
+			}
+		}
+		//fmt.Println("step", numberOfSteps)
+		// Take a step from all locations
+		s := numberOfSteps % len(h.lrInstructions)
+		for i, loc := range locations {
+			switch h.lrInstructions[s] {
+			case byte('L'):
+				locations[i] = h.desertMap[loc.L]
+			case byte('R'):
+				locations[i] = h.desertMap[loc.R]
+			default:
+				fmt.Printf("Unknown step direction %s\n", string(h.lrInstructions[s]))
+				panic("unknown step direction")
+			}
+
+			if loc.GhostZ() {
+				solvedCount += 1
+			}
+
+		}
+
+		if solvedCount == len(locations) {
+			break
+		}
+
+		numberOfSteps += 1
+
+	}
+
+	return numberOfSteps
 
 }
 
