@@ -8,17 +8,22 @@ const (
 	ExampleAnswer1 = -1
 	ExampleAnswer2 = -1
 
-	RealAnswer1 = -1
+	RealAnswer1 = 12737
 	RealAnswer2 = -1
 )
 
 type dayHandler struct {
+	lrInstructions []byte
+	desertMap      map[[3]byte]locationType
+
 	part1Answer any
 	part2Answer any
 }
 
 func New() *dayHandler {
-	h := &dayHandler{}
+	h := &dayHandler{
+		desertMap: make(map[[3]byte]locationType, 0),
+	}
 
 	return h
 }
@@ -28,6 +33,18 @@ func (h *dayHandler) Consume(line []byte) error {
 		return nil
 	}
 
+	// hack to grab the first line
+	if len(h.lrInstructions) == 0 {
+		h.lrInstructions = line
+		return nil
+	}
+
+	loc, err := locationFromLine(line)
+	if err != nil {
+		return err
+	}
+
+	h.desertMap[loc.Name] = loc
 	return nil
 }
 
@@ -39,7 +56,37 @@ func (h *dayHandler) Solve() error {
 }
 
 func (h *dayHandler) AnswerPart1() any {
-	return h.part1Answer
+
+	for _, loc := range h.desertMap {
+		fmt.Println(loc.DebugString())
+	}
+
+	loc, ok := h.desertMap[[3]byte{'A', 'A', 'A'}]
+	if !ok {
+		panic("No starting location")
+	}
+
+	numberOfSteps := 0
+	for {
+		fmt.Printf("In node %s\n", loc.Name)
+		s := numberOfSteps % len(h.lrInstructions)
+		switch h.lrInstructions[s] {
+		case byte('L'):
+			loc = h.desertMap[loc.L]
+		case byte('R'):
+			loc = h.desertMap[loc.R]
+		default:
+			fmt.Printf("Unknown step direction %s\n", string(h.lrInstructions[s]))
+			panic("unknown step direction")
+		}
+
+		numberOfSteps += 1
+		if loc.ZZZ() {
+			break
+		}
+	}
+
+	return numberOfSteps
 
 }
 
