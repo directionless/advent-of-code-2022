@@ -39,6 +39,14 @@ func (loc locationType) DebugString() string {
 	return fmt.Sprintf("%s(L:%s R:%s)", loc.Name, loc.L, loc.R)
 }
 
+func (loc locationType) Equal(b [3]byte) bool {
+	if loc.Name[0] != b[0] || loc.Name[1] != b[1] || loc.Name[2] != b[2] {
+		return false
+	}
+	return true
+
+}
+
 func byteArrTo3byte(in []byte) [3]byte {
 	out := [3]byte{}
 	for i := 0; i < 3; i++ {

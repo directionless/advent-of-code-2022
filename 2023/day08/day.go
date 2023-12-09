@@ -1,7 +1,9 @@
 package day08
 
 import (
+	"errors"
 	"fmt"
+	"math/big"
 
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -12,7 +14,10 @@ const (
 	ExampleAnswer2 = 6
 
 	RealAnswer1 = 12737
-	RealAnswer2 = -1
+	// 3,700,000,000 too low (max single thread brute force)
+	// 4,619,677,975,437,858,519 is too high
+	// 33,449,997,431 nope
+	RealAnswer2 = 9064949303801
 )
 
 type dayHandler struct {
@@ -49,6 +54,55 @@ func (h *dayHandler) Consume(line []byte) error {
 
 	h.desertMap[loc.Name] = loc
 	return nil
+}
+
+// findPeriod find the number of steps in a loop
+func (h *dayHandler) findPeriod(loc locationType) (int, error) {
+	if len(h.lrInstructions) == 0 {
+		return -1, errors.New("lrInstructions is unset")
+	}
+
+	fmt.Printf("Finding period for %s\n", loc.Name)
+
+	startingLoc := loc
+	numberOfSteps := 0
+	lastStep := 0
+	lastZ := startingLoc.Name
+	lastDelta := 0
+
+	for {
+		s := numberOfSteps % len(h.lrInstructions)
+		numberOfSteps += 1
+
+		if numberOfSteps > 1_000_000 {
+			return -1, errors.New("unable to find loop: too many steps")
+		}
+
+		switch h.lrInstructions[s] {
+		case byte('L'):
+			loc = h.desertMap[loc.L]
+		case byte('R'):
+			loc = h.desertMap[loc.R]
+		default:
+			fmt.Printf("Unknown step direction %s\n", string(h.lrInstructions[s]))
+			panic("unknown step direction")
+		}
+
+		if loc.GhostZ() {
+			stepDelta := numberOfSteps - lastStep
+			lastStep = numberOfSteps
+
+			fmt.Printf("Found a z %s after %d steps (delta %d)\n", loc.Name, numberOfSteps, stepDelta)
+
+			if loc.Equal(lastZ) && lastDelta == stepDelta {
+				// confirmed a loop
+				return stepDelta, nil
+			}
+
+			lastZ = loc.Name
+			lastDelta = stepDelta
+		}
+	}
 }
 
 // Solve is called when the input is done being Consumed. Some puzzle can be solved entirely
@@ -92,61 +146,37 @@ func (h *dayHandler) AnswerPart1() any {
 
 }
 
-func (h *dayHandler) AnswerPart2() any {
-	locations := []locationType{}
+func (h *dayHandler) AnswerPart2() int {
+	locations := map[locationType]int{}
+
 	for name, loc := range h.desertMap {
 		if name[2] == byte('A') {
-			locations = append(locations, loc)
+			fmt.Printf("Starting location %s. Looking for period\n", loc.Name)
+			period, err := h.findPeriod(loc)
+			if err != nil {
+				panic(err)
+			}
+			locations[loc] = period
 		}
 	}
 
-	fmt.Println("Starting at:")
-	for _, loc := range locations {
-		fmt.Println(loc.DebugString())
-	}
+	lcm := 1
 
 	p := message.NewPrinter(language.English)
+	for loc, period := range locations {
+		cycleCount := float64(period) / float64(len(h.lrInstructions))
 
-	numberOfSteps := 0
-	for {
-		solvedCount := 0
+		p.Printf("location %s has a period of %d maybe factor %f (prime?) %v\n",
+			loc.Name,
+			period,
+			cycleCount,
+			big.NewInt(int64(cycleCount)).ProbablyPrime(0))
 
-		if numberOfSteps%100_000_000 == 0 {
-			p.Printf("step %d\n", numberOfSteps)
-			for _, loc := range locations {
-				fmt.Println(loc.DebugString())
-			}
-		}
-		//fmt.Println("step", numberOfSteps)
-		// Take a step from all locations
-		s := numberOfSteps % len(h.lrInstructions)
-		for i, loc := range locations {
-			switch h.lrInstructions[s] {
-			case byte('L'):
-				locations[i] = h.desertMap[loc.L]
-			case byte('R'):
-				locations[i] = h.desertMap[loc.R]
-			default:
-				fmt.Printf("Unknown step direction %s\n", string(h.lrInstructions[s]))
-				panic("unknown step direction")
-			}
-
-			if loc.GhostZ() {
-				solvedCount += 1
-			}
-
-		}
-
-		if solvedCount == len(locations) {
-			break
-		}
-
-		numberOfSteps += 1
-
+		lcm = LCM(lcm, period)
 	}
 
-	return numberOfSteps
-
+	fmt.Printf("They should overlap after %d steps\n", lcm)
+	return lcm
 }
 
 func (h *dayHandler) Print() {
