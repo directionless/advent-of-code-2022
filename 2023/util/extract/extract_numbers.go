@@ -5,8 +5,9 @@ import (
 )
 
 const (
-	ascii0 = 48
-	ascii9 = 57
+	ascii0   = 48
+	ascii9   = 57
+	asciiNeg = 45
 )
 
 type foundNumber struct {
@@ -19,11 +20,18 @@ type foundNumber struct {
 // NumbersFromLine extracts the ascii numbers from a line. It ignores all non-number characters.
 // It should produce identical results as two regex calls, but faster.
 //
-// 	  re := regexp.MustCompile(`(\d+)`)
-//	  fmt.Printf("%v\n", re.FindAllString(s, -1))
-//	  fmt.Printf("%v\n", re.FindAllStringIndex(s, -1))
-
+//	re := regexp.MustCompile(`(\d+)`)
+//	fmt.Printf("%v\n", re.FindAllString(s, -1))
+//	fmt.Printf("%v\n", re.FindAllStringIndex(s, -1))
 func NumbersFromLine(line []byte) []foundNumber {
+	return findNumbers(line, false)
+}
+
+func NumbersFromLineWithNegatives(line []byte) []foundNumber {
+	return findNumbers(line, true)
+}
+
+func findNumbers(line []byte, includeNegatives bool) []foundNumber {
 	if line == nil || len(line) == 0 {
 		return nil
 	}
@@ -33,7 +41,7 @@ func NumbersFromLine(line []byte) []foundNumber {
 	cur := foundNumber{}
 	found := false
 	for i, b := range line {
-		if ascii0 <= b && b <= ascii9 {
+		if ascii0 <= b && b <= ascii9 || (includeNegatives && b == asciiNeg) {
 			cur.Str += string(b)
 
 			if !found {
