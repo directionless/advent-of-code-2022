@@ -28,6 +28,14 @@ func sequenceFromLine(line []byte) (*sequence, error) {
 	return s, nil
 }
 
+func (s *sequence) Reverse() {
+	for i := len(s.nums)/2 - 1; i >= 0; i-- {
+		opp := len(s.nums) - 1 - i
+		s.nums[i], s.nums[opp] = s.nums[opp], s.nums[i]
+	}
+
+}
+
 func (s *sequence) Solve() error {
 	dm, err := findDifference(s.nums, 0)
 	if err != nil {

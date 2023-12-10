@@ -6,14 +6,15 @@ import (
 
 const (
 	ExampleAnswer1 = 114
-	ExampleAnswer2 = -1
+	ExampleAnswer2 = 2
 
 	RealAnswer1 = 1772145754
-	RealAnswer2 = -1
+	RealAnswer2 = 867
 )
 
 type dayHandler struct {
 	sequences []*sequence
+	reversed  []*sequence
 
 	part1Answer any
 	part2Answer any
@@ -29,17 +30,35 @@ func (h *dayHandler) Consume(line []byte) error {
 	if len(line) == 0 {
 		return nil
 	}
+	{
+		s, err := sequenceFromLine(line)
+		if err != nil {
+			return fmt.Errorf(`parsing "%s": %w`, line, err)
+		}
 
-	s, err := sequenceFromLine(line)
-	if err != nil {
-		return fmt.Errorf(`parsing "%s": %w`, line, err)
+		if err := s.Solve(); err != nil {
+			return err
+		}
+
+		h.sequences = append(h.sequences, s)
 	}
 
-	if err := s.Solve(); err != nil {
-		return err
+	{
+		s, err := sequenceFromLine(line)
+		if err != nil {
+			return fmt.Errorf(`parsing "%s": %w`, line, err)
+		}
+
+		s.Reverse()
+
+		if err := s.Solve(); err != nil {
+			return err
+		}
+
+		h.reversed = append(h.reversed, s)
+
 	}
 
-	h.sequences = append(h.sequences, s)
 	return nil
 }
 
@@ -51,7 +70,6 @@ func (h *dayHandler) Solve() error {
 }
 
 func (h *dayHandler) AnswerPart1() any {
-
 	tot := 0
 	for _, s := range h.sequences {
 		n, err := s.FindNext(1)
@@ -62,11 +80,19 @@ func (h *dayHandler) AnswerPart1() any {
 	}
 
 	return tot
-
 }
 
 func (h *dayHandler) AnswerPart2() any {
-	return h.part2Answer
+	tot := 0
+	for _, s := range h.reversed {
+		n, err := s.FindNext(1)
+		if err != nil {
+			panic(err)
+		}
+		tot += n
+	}
+
+	return tot
 
 }
 
